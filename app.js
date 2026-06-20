@@ -532,7 +532,13 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             // Use iframe viewer for PDFs and other files
             if (otherFileView && otherFileFrame) {
-               otherFileFrame.src = filepath;
+               let finalSrc = filepath;
+               if (filepath.toLowerCase().endsWith('.pdf')) {
+                 // Use Google Docs viewer to force inline rendering on mobile devices
+                 const absoluteUrl = new URL(filepath, window.location.href).href;
+                 finalSrc = `https://docs.google.com/viewer?url=${encodeURIComponent(absoluteUrl)}&embedded=true`;
+               }
+               otherFileFrame.src = finalSrc;
                if (homeView) homeView.style.display = 'none';
                otherFileView.style.display = 'block';
             } else {
