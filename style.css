@@ -1,0 +1,373 @@
+/* ==========================================================================
+   StudyVault — Minimalist & Motion Focused
+   ========================================================================== */
+
+:root {
+  --bg-dark: #050505;
+  --text-primary: #f0f0f0;
+  --text-secondary: #999;
+  --glass-bg: rgba(20, 20, 20, 0.4);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--text-primary);
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ==========================================================================
+   Background & Movement
+   ========================================================================== */
+.dynamic-bg {
+  position: fixed;
+  top: -5%; left: -5%;
+  width: 110vw; height: 110vh;
+  /* Make sure to save the image you uploaded as bg-wave.jpg in the same folder */
+  background-image: url('bg-wave.jpg'); 
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
+  /* The subtle smooth movement animation */
+  animation: bgPan 40s ease-in-out infinite alternate;
+  /* Slightly dim the background so text remains clear */
+  filter: brightness(0.7) contrast(1.1);
+}
+
+@keyframes bgPan {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.08) translate(-2%, -2%); }
+}
+
+.particles { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; pointer-events:none; }
+
+/* ==========================================================================
+   Layout
+   ========================================================================== */
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem;
+  /* Entrance animation for the whole container */
+  animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Header & Search
+   ========================================================================== */
+.header {
+  margin-bottom: 2rem;
+}
+
+.header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 0.8rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.header__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo { text-decoration: none; color: #fff; font-weight: 600; font-size: 1.1rem; letter-spacing: -0.5px;}
+.glass-badge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 100px;
+  color: var(--text-secondary);
+}
+
+.search-wrapper { flex: 1; max-width: 450px; }
+.search-box {
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
+}
+.search-box:focus-within {
+  border-color: rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.08);
+}
+.search-icon { color: var(--text-secondary); margin-right: 0.75rem; }
+.search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+  font-size: 0.95rem;
+}
+.search-input::placeholder { color: #666; }
+.kbd-shortcut {
+  font-size: 0.7rem; color: #666; background: rgba(255,255,255,0.05); padding: 0.2rem 0.4rem; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* ==========================================================================
+   Filters
+   ========================================================================== */
+.filters-wrapper {
+  margin-bottom: 2rem;
+}
+.filter-pills {
+  display: flex;
+  gap: 0.5rem;
+}
+.pill {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  padding: 0.4rem 1.2rem;
+  border-radius: 100px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.pill:hover { color: #fff; background: rgba(255,255,255,0.1); }
+.pill--active {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* ==========================================================================
+   Files List (List View)
+   ========================================================================== */
+.files-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Minimal List Item Card */
+.file-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  color: inherit;
+  
+  /* Initial state for entrance animation from app.js */
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.file-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* The real magic in transitions */
+.file-card:hover {
+  background: rgba(40, 40, 40, 0.5);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(12px);
+}
+
+.file-card__glow {
+  position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; opacity:0; transition:opacity 0.3s;
+}
+
+/* Header contains Icon and Badges */
+.file-card__header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: 140px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.file-card__icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Badges */
+.file-card__badges { display: flex; gap: 0.5rem; }
+.file-card__badges .badge:last-child { display: none; } /* Hide the size badge since it's redundant here */
+.badge { font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 6px; background: rgba(255,255,255,0.05); color: #aaa;}
+
+/* Title */
+.file-card__title {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 1;
+  padding-right: 1rem;
+}
+
+/* Meta info */
+.file-card__meta {
+  display: flex;
+  gap: 1.5rem;
+  width: 180px;
+  justify-content: flex-end;
+  z-index: 1;
+  opacity: 0.6;
+}
+.meta-item {
+  display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem;
+}
+.meta-item svg { width: 14px; height: 14px; }
+
+/* Actions (Buttons) */
+.file-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: 1.5rem;
+  z-index: 1;
+  opacity: 0; /* Hidden by default */
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+/* Reveal actions on hover */
+.file-card:hover .file-card__actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  text-decoration: none;
+  display: flex; align-items: center; gap: 0.4rem;
+  transition: 0.2s;
+  font-weight: 500;
+}
+.btn--primary { background: #fff; color: #000; }
+.btn--primary:hover { background: #e0e0e0; transform: scale(1.05); }
+.btn--ghost { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
+.btn--ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); transform: scale(1.05); }
+
+/* Colors for icons */
+.file-card__icon--blue { color: #60a5fa; }
+.file-card__icon--amber { color: #fbbf24; }
+.file-card__icon--cyan { color: #22d3ee; }
+.file-card__icon--purple { color: #c084fc; }
+.file-card__icon--green { color: #34d399; }
+.file-card__icon--red { color: #f87171; }
+
+/* ==========================================================================
+   Empty State
+   ========================================================================== */
+.empty-state {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 768px) {
+  .header__inner { flex-direction: column; gap: 1rem; align-items: stretch; }
+  .search-wrapper { max-width: 100%; }
+  .file-card { flex-wrap: wrap; padding: 1rem; }
+  .file-card__title { min-width: 100%; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+  .file-card__meta { width: auto; flex: 1; justify-content: flex-start; }
+  .file-card__actions { opacity: 1; transform: none; margin-left: auto; }
+}
+
+/* ==========================================================================
+   MULTI-SELECTION & DOWNLOAD ALL (GLASSMORPHISM)
+   ========================================================================== */
+.file-card__checkbox {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%) scale(0.8);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 10;
+  pointer-events: none;
+}
+.file-card__checkbox svg {
+  width: 14px;
+  height: 14px;
+  color: #fff;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s;
+}
+
+/* When selection mode is active */
+.selection-mode .file-card {
+  cursor: pointer;
+  padding-left: 60px; /* Make room for checkbox on the left */
+}
+.selection-mode .file-card__checkbox {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+.selection-mode .file-card:hover .file-card__checkbox {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+}
+.selection-mode .file-card__actions {
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* Selected state */
+.file-card.selected {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+}
+.file-card.selected .file-card__checkbox {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 1);
+}
+.file-card.selected .file-card__checkbox svg {
+  color: #000;
+  opacity: 1;
+  transform: scale(1);
+}

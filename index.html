@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyVault - Minimal Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- The dynamic background that uses your uploaded image -->
+    <div class="dynamic-bg"></div>
+    
+    <!-- Optional particles from app.js -->
+    <div class="particles" id="particles" aria-hidden="true"></div>
+
+    <div class="app-container" id="home-view">
+        
+        <!-- Top Navigation / Search Bar -->
+        <header class="header" id="header">
+            <div class="header__inner">
+                <div class="header__left" style="display:flex; align-items:center; gap: 12px;">
+                    <a href="index.html" class="logo" id="logo">
+                        <span class="logo__text">StudyVault</span>
+                    </a>
+                    <span class="glass-badge" id="file-count-badge">0 Files</span>
+                    <button class="btn btn--primary" id="btn-download-all" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px; vertical-align:middle;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span style="vertical-align:middle;">Download All</span>
+                    </button>
+                </div>
+                
+                <div class="search-wrapper">
+                    <div class="search-box" id="search-box">
+                        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" id="search-input" class="search-input" placeholder="Search files..." autocomplete="off">
+                        <kbd class="kbd-shortcut">Ctrl+K</kbd>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filters -->
+        <div class="filters-wrapper">
+            <div class="filter-pills" id="filter-pills"></div>
+        </div>
+
+        <!-- Files List View -->
+        <main class="files-grid" id="files-grid"></main>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+            <p>No resources found.</p>
+        </div>
+    </div>
+
+    <!-- File Reader View (SPA Mode) -->
+    <div class="app-container" id="file-reader-view" style="display: none;">
+        <div style="margin-bottom: 1rem; position: sticky; top: 1rem; z-index: 100;">
+            <button class="btn btn--ghost" id="file-reader-close" style="background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px; vertical-align: middle;">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span style="vertical-align: middle;">Back to Home</span>
+            </button>
+        </div>
+        <div class="markdown-body" id="file-reader-content" dir="rtl" style="background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1); line-height: 1.8; max-width: 100%; overflow-x: auto; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;"></div>
+    </div>
+
+    <!-- Markdown Parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="files-data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
