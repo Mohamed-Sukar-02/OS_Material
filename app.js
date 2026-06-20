@@ -199,8 +199,22 @@ document.addEventListener('DOMContentLoaded', () => {
    *  2.5 DOWNLOAD ALL / MULTI-SELECTION LOGIC
    * ------------------------------------------------------ */
   const btnDownloadAll = document.getElementById('btn-download-all');
+  const btnCancelSelection = document.getElementById('btn-cancel-selection');
   let isSelectionMode = false;
   const selectedFiles = new Set();
+  
+  const exitSelectionMode = () => {
+    isSelectionMode = false;
+    document.body.classList.remove('selection-mode');
+    fileCards.forEach(c => c.classList.remove('selected'));
+    if (btnDownloadAll) btnDownloadAll.innerHTML = `${ICONS.download} Download All`;
+    if (btnCancelSelection) btnCancelSelection.style.display = 'none';
+    selectedFiles.clear();
+  };
+
+  if (btnCancelSelection) {
+    btnCancelSelection.addEventListener('click', exitSelectionMode);
+  }
 
   if (btnDownloadAll) {
     btnDownloadAll.addEventListener('click', () => {
@@ -209,6 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
         isSelectionMode = true;
         document.body.classList.add('selection-mode');
         selectedFiles.clear();
+        
+        if (btnCancelSelection) btnCancelSelection.style.display = 'inline-flex';
         
         // Select all currently visible cards
         fileCards.forEach(card => {
@@ -237,11 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
           });
         }
         
-        isSelectionMode = false;
-        document.body.classList.remove('selection-mode');
-        fileCards.forEach(c => c.classList.remove('selected'));
-        btnDownloadAll.innerHTML = `${ICONS.download} Download All`;
-        selectedFiles.clear();
+        exitSelectionMode();
       }
     });
   }
