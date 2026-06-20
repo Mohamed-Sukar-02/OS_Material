@@ -136,9 +136,52 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   };
 
+  // Group files
+  const examFiles = [];
+  const summaryFiles = [];
+  const otherFiles = [];
+
+  filesData.forEach((file) => {
+    const nameLower = file.fileName.toLowerCase();
+    if (nameLower.includes("طبيعة_الامتحان") || nameLower.includes("طبيعة الامتحان")) {
+      examFiles.push(file);
+    } else if (nameLower.includes("summar")) {
+      summaryFiles.push(file);
+    } else {
+      otherFiles.push(file);
+    }
+  });
+
   // Render all cards into the grid
   if (grid && filesData.length > 0) {
-    grid.innerHTML = filesData.map((file, i) => createCardHTML(file, i)).join('');
+    let html = '';
+    
+    // 1. Exam files
+    if (examFiles.length > 0) {
+      html += examFiles.map((file, i) => createCardHTML(file, i)).join('');
+    }
+
+    // Divider 1: Important Questions
+    if (otherFiles.length > 0) {
+      html += `<div class="section-divider" style="width: 100%; grid-column: 1 / -1; margin: 0.2rem 0 0.2rem 0; display: flex; align-items: center; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9rem; font-weight: 500;">
+        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-right: 1rem;">
+        <span>أسئلة ومعلومات مهمة</span>
+        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-left: 1rem;">
+      </div>`;
+      html += otherFiles.map((file, i) => createCardHTML(file, i + examFiles.length)).join('');
+    }
+
+    // Divider 2: Summaries
+    if (summaryFiles.length > 0) {
+      html += `<div class="section-divider" style="width: 100%; grid-column: 1 / -1; margin: 0.2rem 0 0.2rem 0; display: flex; align-items: center; text-align: center; color: rgba(255,255,255,0.5); font-size: 0.9rem; font-weight: 500;">
+        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-right: 1rem;">
+        <span>Summaries</span>
+        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.1); margin-left: 1rem;">
+      </div>`;
+      html += summaryFiles.map((file, i) => createCardHTML(file, i + examFiles.length + otherFiles.length)).join('');
+    }
+
+    grid.innerHTML = html;
   } else if (grid) {
     grid.innerHTML = '';
     if (emptyState) emptyState.style.display = 'flex';
@@ -244,6 +287,15 @@ document.addEventListener('DOMContentLoaded', () => {
         visibleCount++;
       } else {
         card.style.display = 'none';
+      }
+    });
+
+    const dividers = document.querySelectorAll('.section-divider');
+    dividers.forEach(div => {
+      if (query || activeFilter !== 'all') {
+        div.style.display = 'none';
+      } else {
+        div.style.display = 'flex';
       }
     });
 
