@@ -451,6 +451,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileReaderClose = document.getElementById('file-reader-close');
   const fileReaderContent = document.getElementById('file-reader-content');
   const homeView = document.getElementById('home-view');
+  
+  const otherFileView = document.getElementById('other-file-view');
+  const otherFileClose = document.getElementById('other-file-close');
+  const otherFileFrame = document.getElementById('other-file-frame');
+
+  if (otherFileClose) {
+    otherFileClose.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (otherFileView) otherFileView.style.display = 'none';
+      if (otherFileFrame) otherFileFrame.src = '';
+      if (homeView) homeView.style.display = 'block';
+    });
+  }
+
+  // Handle Esc key specifically for MD files
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if (fileReaderView && fileReaderView.style.display === 'block') {
+        fileReaderView.style.display = 'none';
+        if (homeView) homeView.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+  });
 
   if (fileReaderClose) {
     fileReaderClose.addEventListener('click', (e) => {
@@ -472,38 +496,48 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const filepath = card.dataset.filepath;
         
-        // Check if it is the requested file or a general text file
-        if (filepath && (filepath.endsWith('.txt') || filepath.endsWith('.md'))) {
+        if (filepath) {
           e.preventDefault(); // Stop normal navigation
           
-          try {
-            let text = "";
-            
-            // 1. Try to find content from filesData (solves local file:/// CORS issue)
-            const fileObj = filesData.find(f => f.filePath === filepath);
-            if (fileObj && fileObj.textContent) {
-               text = fileObj.textContent;
-            } else {
-               // 2. Fallback to fetch if it's hosted
-               const response = await fetch(filepath);
-               if (!response.ok) throw new Error('Network response was not ok');
-               text = await response.text();
-            }
-            
-            // Render markdown
-            if (fileReaderContent) {
-              fileReaderContent.innerHTML = window.marked ? marked.parse(text) : `<pre>${text}</pre>`;
-            }
-            
-            // Show SPA View, hide Home View
-            if (homeView) homeView.style.display = 'none';
-            if (fileReaderView) fileReaderView.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+          if (filepath.endsWith('.txt') || filepath.endsWith('.md')) {
+            try {
+              let text = "";
+              
+              // 1. Try to find content from filesData (solves local file:/// CORS issue)
+              const fileObj = filesData.find(f => f.filePath === filepath);
+              if (fileObj && fileObj.textContent) {
+                 text = fileObj.textContent;
+              } else {
+                 // 2. Fallback to fetch if it's hosted
+                 const response = await fetch(filepath);
+                 if (!response.ok) throw new Error('Network response was not ok');
+                 text = await response.text();
+              }
+              
+              // Render markdown
+              if (fileReaderContent) {
+                fileReaderContent.innerHTML = window.marked ? marked.parse(text) : `<pre>${text}</pre>`;
+              }
+              
+              // Show SPA View, hide Home View
+              if (homeView) homeView.style.display = 'none';
+              if (fileReaderView) fileReaderView.style.display = 'block';
+              window.scrollTo({ top: 0, behavior: 'smooth' });
 
-          } catch (error) {
-            console.error('Error reading file:', error);
-            // Fallback to normal navigation
-            window.location.href = filepath;
+            } catch (error) {
+              console.error('Error reading file:', error);
+              // Fallback to normal navigation
+              window.location.href = filepath;
+            }
+          } else {
+            // Use iframe viewer for PDFs and other files
+            if (otherFileView && otherFileFrame) {
+               otherFileFrame.src = filepath;
+               if (homeView) homeView.style.display = 'none';
+               otherFileView.style.display = 'block';
+            } else {
+               window.location.href = filepath;
+            }
           }
         }
       }
