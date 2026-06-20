@@ -451,19 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const fileReaderClose = document.getElementById('file-reader-close');
   const fileReaderContent = document.getElementById('file-reader-content');
   const homeView = document.getElementById('home-view');
-  
-  const otherFileView = document.getElementById('other-file-view');
-  const otherFileClose = document.getElementById('other-file-close');
-  const otherFileFrame = document.getElementById('other-file-frame');
-
-  if (otherFileClose) {
-    otherFileClose.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (otherFileView) otherFileView.style.display = 'none';
-      if (otherFileFrame) otherFileFrame.src = '';
-      if (homeView) homeView.style.display = 'block';
-    });
-  }
 
   // Handle Esc key specifically for MD files
   document.addEventListener('keydown', (e) => {
@@ -530,20 +517,8 @@ document.addEventListener('DOMContentLoaded', () => {
               window.location.href = filepath;
             }
           } else {
-            // Use iframe viewer for PDFs and other files
-            if (otherFileView && otherFileFrame) {
-               let finalSrc = filepath;
-               if (filepath.toLowerCase().endsWith('.pdf')) {
-                 // Use Google Docs viewer to force inline rendering on mobile devices
-                 const absoluteUrl = new URL(filepath, window.location.href).href;
-                 finalSrc = `https://docs.google.com/viewer?url=${encodeURIComponent(absoluteUrl)}&embedded=true`;
-               }
-               otherFileFrame.src = finalSrc;
-               if (homeView) homeView.style.display = 'none';
-               otherFileView.style.display = 'block';
-            } else {
-               window.location.href = filepath;
-            }
+            // Reverted to native browser behavior (no iframe) so mobile browsers don't show the fallback UI
+            window.location.href = filepath;
           }
         }
       }
