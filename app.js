@@ -96,8 +96,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const escapedTitle = (file.title || file.fileName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const escapedDesc = (file.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+    // Show "New" ribbon if it's the OS_Diagrams file and hasn't been seen yet
+    const isNew = file.fileName.includes("OS_Diagrams") && !localStorage.getItem('seen_' + safeId);
+    const newBadgeHtml = isNew ? `<div class="ribbon-new" id="new-badge-${safeId}">New</div>` : '';
+
     return `
-      <article class="file-card" data-category="${file.category || ''}" data-name="${escapedTitle}" data-filepath="${file.filePath}" id="file-card-${index + 1}">
+      <article class="file-card" data-category="${file.category || ''}" data-name="${escapedTitle}" data-filepath="${file.filePath}" data-safeid="${safeId}" id="file-card-${index + 1}">
+        ${newBadgeHtml}
         <div class="file-card__glow" aria-hidden="true"></div>
         <div class="file-card__checkbox">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -486,6 +491,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (grid) {
     grid.addEventListener('click', async (e) => {
+      // Dismiss new badge and mark as seen
+      const cardClicked = e.target.closest('.file-card');
+      if (cardClicked && cardClicked.dataset.safeid) {
+        const safeId = cardClicked.dataset.safeid;
+        if (!localStorage.getItem('seen_' + safeId)) {
+          localStorage.setItem('seen_' + safeId, 'true');
+          const badge = document.getElementById('new-badge-' + safeId);
+          if (badge) badge.style.display = 'none';
+        }
+      }
+
       // Find if we clicked on an Open File button
       const openBtn = e.target.closest('a[id^="open-"]');
       if (openBtn) {
