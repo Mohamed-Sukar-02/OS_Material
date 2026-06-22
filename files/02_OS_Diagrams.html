@@ -31,7 +31,7 @@
 
         header {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 1.5rem 2rem;
             background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             position: relative;
@@ -61,11 +61,23 @@
             letter-spacing: -1px;
         }
 
-        header p {
-            margin-top: 1rem;
+        .section-intro {
+            text-align: center;
+            margin: 2rem auto -1rem;
+            max-width: 800px;
+        }
+
+        .section-intro p {
             color: var(--text-muted);
             font-size: 1.25rem;
             font-weight: 300;
+            background: rgba(15, 23, 42, 0.6);
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 0;
         }
 
         .grid {
@@ -113,6 +125,68 @@
             opacity: 1;
         }
 
+        /* Recommended Card Styles */
+        .recommended-card {
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            background: linear-gradient(145deg, var(--bg-card) 0%, rgba(251, 191, 36, 0.05) 100%);
+        }
+
+        .recommended-card::before {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .recommended-card .card-badge {
+            background: rgba(251, 191, 36, 0.1);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        /* Highlight Animation */
+        @keyframes highlightCard {
+            0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7); border-color: rgba(251, 191, 36, 1); transform: scale(1.02); }
+            50% { box-shadow: 0 0 30px 10px rgba(251, 191, 36, 0.3); border-color: rgba(251, 191, 36, 0.8); transform: scale(1.05); }
+            100% { box-shadow: 0 20px 40px rgba(0,0,0,0.5); transform: scale(1); border-color: rgba(251, 191, 36, 0.4); }
+        }
+
+        .card.highlighted {
+            animation: highlightCard 0.8s ease-out forwards;
+            z-index: 10;
+        }
+
+        /* Toast Notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            color: #f8fafc;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 15px rgba(251, 191, 36, 0.2);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast-notification .toast-icon {
+            color: #fbbf24;
+            font-size: 1.2rem;
+        }
+
         .card-header {
             margin-bottom: 1.5rem;
             display: flex;
@@ -137,6 +211,7 @@
             font-weight: 700;
             white-space: nowrap;
             border: 1px solid rgba(56, 189, 248, 0.2);
+            transition: all 0.3s ease;
         }
 
         .card-image-container {
@@ -233,7 +308,7 @@
         }
 
         .first-badge-tooltip::after {
-            content: '💡  Lecture . Slide ';
+            content: '💡 Format: Lecture . Slide';
             position: absolute;
             bottom: 140%;
             right: -20px;
@@ -274,6 +349,100 @@
             80% { opacity: 1; }
             100% { opacity: 0; visibility: hidden; }
         }
+    
+        /* Markdown Classic Styles */
+        .markdown-section {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 1.5rem 2rem;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            direction: rtl;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .markdown-section h2 {
+            margin-top: 0;
+            color: #f8fafc;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .md-text {
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .heading-item {
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .heading-item strong {
+            color: #38bdf8;
+            font-size: 1.15rem;
+        }
+
+        .diagram-link {
+            color: #fbbf24;
+            font-weight: 700;
+            text-decoration: none;
+            background: rgba(251, 191, 36, 0.1);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            direction: ltr;
+        }
+
+        .diagram-link:hover {
+            background: rgba(251, 191, 36, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .md-list {
+            margin-top: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-right: 1.5rem;
+            padding-left: 0;
+            color: #94a3b8;
+        }
+        
+        .md-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .markdown-section code {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            color: #f87171;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .important-note {
+            background: rgba(253, 38, 0, 0.150);
+            border-right: 4px solid #f5460b8a;
+            padding: 1rem 1.5rem;
+            margin-top: 2rem;
+            border-radius: 8px;
+            color: #fbbf24;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .important-note strong {
+            color: #fcb64d;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -282,12 +451,53 @@
 
     <header>
         <h1>OS Diagrams</h1>
-        <p>Interactive Study Materials & Visualizations</p>
     </header>
+
+    <section class="markdown-section">
+        <div class="markdown-content">
+<p class="md-text">بعد معرفة جميع رسومات المنهج ومقارنتها باسئلة الامتحانات لمعرفة اهم الرسومات</p>
+<p class="md-text">دي الخلاصة الخام لكل الرسومات اللي انطلبت في الامتحانات (سواء بالاسم أو ضمنياً) ومكانها فين بالظبط:</p>
+<p class="heading-item"><strong>1. رسمة <a href="#A_Seven_State_Model__Suspended_Processes" class="diagram-link">A Seven-State Model: Suspended Processes</a> :</strong></p>
+<p class="md-text">الرسمة دي أكتر رسمة اتكررت وانطلبت بالاسم في 3 امتحانات:</p>
+<ul class="md-list">
+<li>  في امتحان <code>Midterm 2025.pdf</code>: انطلبت صراحة في (السؤال التاني).</li>
+<li>  في امتحان <code>Final OS.pdf</code>: انطلبت صراحة في (السؤال الأول - فقرة 3).</li>
+<li>  في امتحان <code>Final2025 (Dr.Hani).pdf</code>: انطلبت صراحة في (السؤال التاني - فقرة A).</li>
+</ul>
+<p class="heading-item"><strong>2. رسمة <a href="#CPU_Switch_From_Process_to_Process" class="diagram-link">CPU Switch From Process to Process</a> (رسمة الـ Context Switch):</strong></p>
+<p class="md-text">تاني أهم رسمة وانطلبت بشكل ضمني بتوضيح الـ Actions الخاصة بالـ Context Switch:</p>
+<ul class="md-list">
+<li>  في امتحان <code>OS FINAL 2020(Dr.Reda).pdf</code>: انطلبت في (السؤال الأول - فقرة b).</li>
+<li>  في امتحان <code>Final OS.pdf</code>: انطلبت بنفس الصيغة بالظبط في (السؤال الأول - فقرة 2).</li>
+</ul>
+<p class="heading-item"><strong>3. رسمة <a href="#Interrupt_drive_I_O_Cycle" class="diagram-link">Interrupt-drive I/O Cycle</a> :</strong></p>
+<ul class="md-list">
+<li>  في امتحان <code>OS FINAL 2020(Dr.Reda).pdf</code>: انطلبت بالاسم عشان توضح بيها مقولة معينة في (السؤال الأول - فقرة a).</li>
+</ul>
+<p class="heading-item"><strong>4. رسمة <a href="#Representation_of_Process_Scheduling" class="diagram-link">Representation of Process Scheduling</a> (واللي بتتسمى برضو الـ Queuing diagram models):</strong></p>
+<ul class="md-list">
+<li>  في امتحان <code>Final2025 (Dr.Hani).pdf</code>: انطلبت بالاسم مع رسمة الـ 7 حالات في (السؤال التاني - فقرة A).</li>
+</ul>
+<p class="heading-item"><strong>5. رسمة <a href="#A_Five_State_Process_Model" class="diagram-link">A Five-State Process Model</a> :</strong></p>
+<ul class="md-list">
+<li>  في امتحان <code>OS solved MCQ .pdf</code>: مجاتش كسؤال مقالي ترسمه من الصفر، لكن جات في آخر صفحة في الامتحان كرسمة تخطيطية فاضية (Fill in spaces) ومطلوب منك تحط أسماء الـ 5 حالات على الأسهم والدوائر بتاعتها (Waiting, Ready, Terminated, Running, New).</li>
+</ul>
+
+<div class="important-note">
+    <strong>⚠️ تنبيه:</strong> 
+    هذا الملخص لا يغني عن مراجعة جميع الرسومات في المنهج، لكنه يوضح أهم الرسومات اللي انطلبت في الامتحانات بشكل مباشر أو ضمني.
+</div>
+
+        </div>
+    </section>
+
+    <div class="section-intro">
+        <p>All diagrams of Operating System material</p>
+    </div>
 
     <main class="grid">
 
-        <article class="card">
+        <article class="card" id="Abstract_View_of_Components_of_Computer">
             <div class="card-header">
                 <h2 class="card-title">Abstract View of Components of Computer</h2>
                 <span class="card-badge first-badge-tooltip">1.4</span>
@@ -296,7 +506,7 @@
                 <img class="card-image" src="OS diagrams/Abstract View of Components of Computer.png" alt="Abstract View of Components of Computer" data-full="OS diagrams/Abstract View of Components of Computer.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Computer_System_Organization">
             <div class="card-header">
                 <h2 class="card-title">Computer System Organization</h2>
                 <span class="card-badge">1.7</span>
@@ -306,7 +516,7 @@
             </div>
         </article>
         
-        <article class="card">
+        <article class="card recommended-card" id="Interrupt_drive_I_O_Cycle">
             <div class="card-header">
                 <h2 class="card-title">Interrupt-drive I/O Cycle</h2>
                 <span class="card-badge">1.13</span>
@@ -315,7 +525,7 @@
                 <img class="card-image" src="OS diagrams/Interrupt-drive IO Cycle.png" alt="Interrupt-drive I/O Cycle" data-full="OS diagrams/Interrupt-drive IO Cycle.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Storage_Device_Hierarchy">
             <div class="card-header">
                 <h2 class="card-title">Storage-Device Hierarchy</h2>
                 <span class="card-badge">1.17</span>
@@ -324,7 +534,7 @@
                 <img class="card-image" src="OS diagrams/Storage-Device Hierarchy.png" alt="Storage-Device Hierarchy" data-full="OS diagrams/Storage-Device Hierarchy.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="How_a_Modern_Computer_Works">
             <div class="card-header">
                 <h2 class="card-title">How a Modern Computer Works</h2>
                 <span class="card-badge">1.18</span>
@@ -333,7 +543,7 @@
                 <img class="card-image" src="OS diagrams/How a Modern Computer Works.png" alt="How a Modern Computer Works" data-full="OS diagrams/How a Modern Computer Works.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Symmetric_Multiprocessing_Architecture">
             <div class="card-header">
                 <h2 class="card-title">Symmetric Multiprocessing Architecture</h2>
                 <span class="card-badge">1.21</span>
@@ -342,7 +552,7 @@
                 <img class="card-image" src="OS diagrams/Symmetric Multiprocessing Architecture.png" alt="Symmetric Multiprocessing Architecture" data-full="OS diagrams/Symmetric Multiprocessing Architecture.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="A_Dual_Core_Design">
             <div class="card-header">
                 <h2 class="card-title">A Dual-Core Design</h2>
                 <span class="card-badge">1.22</span>
@@ -351,7 +561,7 @@
                 <img class="card-image" src="OS diagrams/A Dual-Core Design.png" alt="A Dual-Core Design" data-full="OS diagrams/A Dual-Core Design.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Memory_Layout_for_Multiprogrammed_System">
             <div class="card-header">
                 <h2 class="card-title">Memory Layout for Multiprogrammed System</h2>
                 <span class="card-badge">1.26</span>
@@ -360,7 +570,7 @@
                 <img class="card-image" src="OS diagrams/Memory Layout for Multiprogrammed System.png" alt="Memory Layout for Multiprogrammed System" data-full="OS diagrams/Memory Layout for Multiprogrammed System.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Transition_from_User_to_Kernel_Mode">
             <div class="card-header">
                 <h2 class="card-title">Transition from User to Kernel Mode</h2>
                 <span class="card-badge">1.28</span>
@@ -369,7 +579,7 @@
                 <img class="card-image" src="OS diagrams/Transition from User to Kernel Mode.png" alt="Transition from User to Kernel Mode" data-full="OS diagrams/Transition from User to Kernel Mode.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Computing_Environments___Client_Server">
             <div class="card-header">
                 <h2 class="card-title">Computing Environments – Client-Server</h2>
                 <span class="card-badge">1.40</span>
@@ -378,7 +588,7 @@
                 <img class="card-image" src="OS diagrams/Computing Environments – Client-Server.png" alt="Computing Environments – Client-Server" data-full="OS diagrams/Computing Environments – Client-Server.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Computing_Environments___Cloud_Computing">
             <div class="card-header">
                 <h2 class="card-title">Computing Environments – Cloud Computing</h2>
                 <span class="card-badge">1.42</span>
@@ -387,7 +597,7 @@
                 <img class="card-image" src="OS diagrams/Computing Environments – Cloud Computing.png" alt="Computing Environments – Cloud Computing" data-full="OS diagrams/Computing Environments – Cloud Computing.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="A_View_of_Operating_System_Services">
             <div class="card-header">
                 <h2 class="card-title">A View of Operating System Services</h2>
                 <span class="card-badge">2.6</span>
@@ -396,7 +606,7 @@
                 <img class="card-image" src="OS diagrams/A View of Operating System Services.png" alt="A View of Operating System Services" data-full="OS diagrams/A View of Operating System Services.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="API___System_Call___OS_Relationship">
             <div class="card-header">
                 <h2 class="card-title">API – System Call – OS Relationship</h2>
                 <span class="card-badge">2.11</span>
@@ -405,7 +615,7 @@
                 <img class="card-image" src="OS diagrams/API – System Call – OS Relationship.png" alt="API – System Call – OS Relationship" data-full="OS diagrams/API – System Call – OS Relationship.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="The_Role_of_the_Linker_and_Loader">
             <div class="card-header">
                 <h2 class="card-title">The Role of the Linker and Loader</h2>
                 <span class="card-badge">2.19</span>
@@ -414,7 +624,7 @@
                 <img class="card-image" src="OS diagrams/The Role of the Linker and Loader.png" alt="The Role of the Linker and Loader" data-full="OS diagrams/The Role of the Linker and Loader.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Process_in_Memory">
             <div class="card-header">
                 <h2 class="card-title">Process in Memory</h2>
                 <span class="card-badge">2.29</span>
@@ -423,7 +633,7 @@
                 <img class="card-image" src="OS diagrams/Process in Memory.png" alt="Process in Memory" data-full="OS diagrams/Process in Memory.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Memory_Layout_of_a_C_Program">
             <div class="card-header">
                 <h2 class="card-title">Memory Layout of a C Program</h2>
                 <span class="card-badge">2.30</span>
@@ -432,7 +642,7 @@
                 <img class="card-image" src="OS diagrams/Memory Layout of a C Program.png" alt="Memory Layout of a C Program" data-full="OS diagrams/Memory Layout of a C Program.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Process_Control_Block__PCB_">
             <div class="card-header">
                 <h2 class="card-title">Process Control Block (PCB)</h2>
                 <span class="card-badge">2.33 - 4.19</span>
@@ -441,7 +651,7 @@
                 <img class="card-image" src="OS diagrams/Process Control Block (PCB).png" alt="Process Control Block (PCB)" data-full="OS diagrams/Process Control Block (PCB).png">
             </div>
         </article>
-        <article class="card">
+        <article class="card recommended-card" id="Representation_of_Process_Scheduling">
             <div class="card-header">
                 <h2 class="card-title">Representation of Process Scheduling</h2>
                 <span class="card-badge">2.37 - 4.23</span>
@@ -450,7 +660,7 @@
                 <img class="card-image" src="OS diagrams/Representation of Process Scheduling.png" alt="Representation of Process Scheduling" data-full="OS diagrams/Representation of Process Scheduling.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card recommended-card" id="CPU_Switch_From_Process_to_Process">
             <div class="card-header">
                 <h2 class="card-title">CPU Switch From Process to Process</h2>
                 <span class="card-badge">2.38 - 4.26 - (4.27) - 428</span>
@@ -459,7 +669,7 @@
                 <img class="card-image" src="OS diagrams/CPU Switch From Process to Process.png" alt="CPU Switch From Process to Process" data-full="OS diagrams/CPU Switch From Process to Process.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Process_Creation">
             <div class="card-header">
                 <h2 class="card-title">Process Creation</h2>
                 <span class="card-badge">2.43 - 4.35</span>
@@ -468,7 +678,7 @@
                 <img class="card-image" src="OS diagrams/Process Creation.png" alt="Process Creation" data-full="OS diagrams/Process Creation.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="A_two_State_Process_Model">
             <div class="card-header">
                 <h2 class="card-title">A two-State Process Model</h2>
                 <span class="card-badge">4.6</span>
@@ -477,7 +687,7 @@
                 <img class="card-image" src="OS diagrams/A two-State Process Model.png" alt="A two-State Process Model" data-full="OS diagrams/A two-State Process Model.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card recommended-card" id="A_Five_State_Process_Model">
             <div class="card-header">
                 <h2 class="card-title">A Five-State Process Model</h2>
                 <span class="card-badge">4.7 - 4.8</span>
@@ -486,7 +696,7 @@
                 <img class="card-image" src="OS diagrams/A Five-State Process Model.png" alt="A Five-State Process Model" data-full="OS diagrams/A Five-State Process Model.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Single_Blocked_Queue">
             <div class="card-header">
                 <h2 class="card-title">Single Blocked Queue</h2>
                 <span class="card-badge">4.9</span>
@@ -495,7 +705,7 @@
                 <img class="card-image" src="OS diagrams/Single Blocked Queue.png" alt="Single Blocked Queue" data-full="OS diagrams/Single Blocked Queue.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Multiple_Blocked_Queues">
             <div class="card-header">
                 <h2 class="card-title">Multiple Blocked Queues</h2>
                 <span class="card-badge">4.10</span>
@@ -504,7 +714,7 @@
                 <img class="card-image" src="OS diagrams/Multiple Blocked Queues.png" alt="Multiple Blocked Queues" data-full="OS diagrams/Multiple Blocked Queues.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card recommended-card" id="A_Seven_State_Model__Suspended_Processes">
             <div class="card-header">
                 <h2 class="card-title">A Seven-State Model: Suspended Processes</h2>
                 <span class="card-badge">4.13</span>
@@ -513,7 +723,7 @@
                 <img class="card-image" src="OS diagrams/A Seven-State Model Suspended Processes.png" alt="A Seven-State Model: Suspended Processes" data-full="OS diagrams/A Seven-State Model Suspended Processes.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="UNIX_Process_State_Transition_Diagram">
             <div class="card-header">
                 <h2 class="card-title">UNIX Process State Transition Diagram</h2>
                 <span class="card-badge">4.15</span>
@@ -522,7 +732,7 @@
                 <img class="card-image" src="OS diagrams/UNIX Process State Transition Diagram.png" alt="UNIX Process State Transition Diagram" data-full="OS diagrams/UNIX Process State Transition Diagram.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Windows_NT_Refineme">
             <div class="card-header">
                 <h2 class="card-title">Windows NT Refineme</h2>
                 <span class="card-badge">4.16</span>
@@ -531,7 +741,7 @@
                 <img class="card-image" src="OS diagrams/Windows NT Refineme.png" alt="Windows NT Refineme" data-full="OS diagrams/Windows NT Refineme.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Swappingnt">
             <div class="card-header">
                 <h2 class="card-title">Swappingnt</h2>
                 <span class="card-badge">4.17</span>
@@ -540,7 +750,7 @@
                 <img class="card-image" src="OS diagrams/Swappingnt.png" alt="Swappingnt" data-full="OS diagrams/Swappingnt.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Schedulers_and_Dispatcher">
             <div class="card-header">
                 <h2 class="card-title">Schedulers and Dispatcher</h2>
                 <span class="card-badge">4.31</span>
@@ -549,7 +759,7 @@
                 <img class="card-image" src="OS diagrams/Schedulers and Dispatcher.png" alt="Schedulers and Dispatcher" data-full="OS diagrams/Schedulers and Dispatcher.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Dispatcher">
             <div class="card-header">
                 <h2 class="card-title">Dispatcher</h2>
                 <span class="card-badge">5.5</span>
@@ -558,7 +768,7 @@
                 <img class="card-image" src="OS diagrams/Dispatcher.png" alt="Dispatcher" data-full="OS diagrams/Dispatcher.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Multithreaded_Multicore_System">
             <div class="card-header">
                 <h2 class="card-title">Multithreaded Multicore System</h2>
                 <span class="card-badge">6.11</span>
@@ -567,7 +777,7 @@
                 <img class="card-image" src="OS diagrams/Multithreaded Multicore System.png" alt="Multithreaded Multicore System" data-full="OS diagrams/Multithreaded Multicore System.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Real_Time_CPU_Scheduling">
             <div class="card-header">
                 <h2 class="card-title">Real-Time CPU Scheduling</h2>
                 <span class="card-badge">6.15</span>
@@ -576,7 +786,7 @@
                 <img class="card-image" src="OS diagrams/Real-Time CPU Scheduling.png" alt="Real-Time CPU Scheduling" data-full="OS diagrams/Real-Time CPU Scheduling.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Interrupt_Latency">
             <div class="card-header">
                 <h2 class="card-title">Interrupt Latency</h2>
                 <span class="card-badge">6.16</span>
@@ -585,7 +795,7 @@
                 <img class="card-image" src="OS diagrams/Interrupt Latency.png" alt="Interrupt Latency" data-full="OS diagrams/Interrupt Latency.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Dispatch_Latency">
             <div class="card-header">
                 <h2 class="card-title">Dispatch Latency</h2>
                 <span class="card-badge">6.17</span>
@@ -594,7 +804,7 @@
                 <img class="card-image" src="OS diagrams/Dispatch Latency.png" alt="Dispatch Latency" data-full="OS diagrams/Dispatch Latency.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Priority_based_Scheduling">
             <div class="card-header">
                 <h2 class="card-title">Priority-based Scheduling</h2>
                 <span class="card-badge">6.18</span>
@@ -603,7 +813,7 @@
                 <img class="card-image" src="OS diagrams/Priority-based Scheduling.png" alt="Priority-based Scheduling" data-full="OS diagrams/Priority-based Scheduling.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Communications_Models">
             <div class="card-header">
                 <h2 class="card-title">Communications Models</h2>
                 <span class="card-badge">7.3</span>
@@ -612,7 +822,7 @@
                 <img class="card-image" src="OS diagrams/Communications Models.png" alt="Communications Models" data-full="OS diagrams/Communications Models.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Local_Procedure_Calls_in_Windows">
             <div class="card-header">
                 <h2 class="card-title">Local Procedure Calls in Windows</h2>
                 <span class="card-badge">7.20</span>
@@ -621,7 +831,7 @@
                 <img class="card-image" src="OS diagrams/Local Procedure Calls in Windows.png" alt="Local Procedure Calls in Windows" data-full="OS diagrams/Local Procedure Calls in Windows.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Network_Attached_Storage">
             <div class="card-header">
                 <h2 class="card-title">Network-Attached Storage</h2>
                 <span class="card-badge">8.20</span>
@@ -630,7 +840,7 @@
                 <img class="card-image" src="OS diagrams/Network-Attached Storage.png" alt="Network-Attached Storage" data-full="OS diagrams/Network-Attached Storage.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Storage_Area_Network">
             <div class="card-header">
                 <h2 class="card-title">Storage Area Network</h2>
                 <span class="card-badge">8.23</span>
@@ -639,7 +849,7 @@
                 <img class="card-image" src="OS diagrams/Storage Area Network.png" alt="Storage Area Network" data-full="OS diagrams/Storage Area Network.png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="RAID__0___1__and__1___0_">
             <div class="card-header">
                 <h2 class="card-title">RAID (0 + 1) and (1 + 0)</h2>
                 <span class="card-badge">8.27</span>
@@ -648,7 +858,7 @@
                 <img class="card-image" src="OS diagrams/RAID (0 + 1) and (1 + 0).png" alt="RAID (0 + 1) and (1 + 0)" data-full="OS diagrams/RAID (0 + 1) and (1 + 0).png">
             </div>
         </article>
-        <article class="card">
+        <article class="card" id="Schematic_view_of_a_Monitor">
             <div class="card-header">
                 <h2 class="card-title">Schematic view of a Monitor</h2>
                 <span class="card-badge">9.37</span>
@@ -688,6 +898,47 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') closeLightbox();
         });
+    
+        document.querySelectorAll('.diagram-link').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                    
+                    // Remove previous highlights
+                    document.querySelectorAll('.card.highlighted').forEach(el => el.classList.remove('highlighted'));
+                    
+                    // Use IntersectionObserver to trigger animation exactly when the element becomes visible
+                    const observer = new IntersectionObserver((entries, obs) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                // Add highlight class
+                                targetElement.classList.add('highlighted');
+                                
+                                // Clean up animation class
+                                setTimeout(() => {
+                                    targetElement.classList.remove('highlighted');
+                                }, 800);
+                                
+                                // Disconnect the observer so it doesn't trigger again on normal scroll
+                                obs.disconnect();
+                            }
+                        });
+                    }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
+                    
+                    // Delay observation slightly to allow scrolling to start and prevent immediate triggering if already in view
+                    setTimeout(() => {
+                        observer.observe(targetElement);
+                    }, 100);
+                }
+            });
+        });
+
     </script>
 </body>
 </html>
