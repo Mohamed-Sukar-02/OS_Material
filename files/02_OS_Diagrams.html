@@ -1,0 +1,693 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Diagrams Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.5);
+            --gradient: linear-gradient(135deg, #38bdf8, #818cf8);
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: var(--gradient);
+            opacity: 0.5;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            margin-top: 1rem;
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            font-weight: 300;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 3rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 2px;
+            background: var(--gradient);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .card-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .card-badge {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .card-image-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+
+        .card-image {
+            max-width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.5s ease;
+        }
+
+        .card-image-container:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        /* Lightbox Modal */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            padding: 2rem;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .lightbox-content {
+            max-width: 100%;
+            max-height: 100%;
+            position: relative;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .lightbox.active .lightbox-img {
+            transform: scale(1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -3rem;
+            right: 0;
+            color: #fff;
+            font-size: 2.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .no-image {
+            padding: 3rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .first-badge-tooltip {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .first-badge-tooltip::after {
+            content: '💡  Lecture . Slide ';
+            position: absolute;
+            bottom: 140%;
+            right: -20px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+            animation: bounce-tooltip 2s infinite, fade-out-tooltip 10s forwards;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .first-badge-tooltip::before {
+            content: '';
+            position: absolute;
+            bottom: calc(140% - 10px);
+            right: 20px;
+            border-width: 6px;
+            border-style: solid;
+            border-color: #6d28d9 transparent transparent transparent;
+            animation: fade-out-tooltip 10s forwards;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        @keyframes bounce-tooltip {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes fade-out-tooltip {
+            0% { opacity: 0; }
+            10% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+<!-- StudyVault Navigation -->
+<a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:99999;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,rgba(99,102,241,0.9),rgba(139,92,246,0.9));color:white;text-decoration:none;border-radius:12px;font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.3px;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 15px rgba(99,102,241,0.3),0 1px 3px rgba(0,0,0,0.2);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);opacity:0.9;" onmouseover="this.style.opacity='1';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(99,102,241,0.4),0 2px 5px rgba(0,0,0,0.2)'" onmouseout="this.style.opacity='0.9';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(99,102,241,0.3),0 1px 3px rgba(0,0,0,0.2)'" id="back-to-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>StudyVault Home</a>
+
+    <header>
+        <h1>OS Diagrams</h1>
+        <p>Interactive Study Materials & Visualizations</p>
+    </header>
+
+    <main class="grid">
+
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Abstract View of Components of Computer</h2>
+                <span class="card-badge first-badge-tooltip">1.4</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Abstract View of Components of Computer.png" alt="Abstract View of Components of Computer" data-full="OS diagrams/Abstract View of Components of Computer.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Computer System Organization</h2>
+                <span class="card-badge">1.7</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Computer System Organization.png" alt="Computer System Organization" data-full="OS diagrams/Computer System Organization.png">
+            </div>
+        </article>
+        
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Interrupt-drive I/O Cycle</h2>
+                <span class="card-badge">1.13</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Interrupt-drive IO Cycle.png" alt="Interrupt-drive I/O Cycle" data-full="OS diagrams/Interrupt-drive IO Cycle.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Storage-Device Hierarchy</h2>
+                <span class="card-badge">1.17</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Storage-Device Hierarchy.png" alt="Storage-Device Hierarchy" data-full="OS diagrams/Storage-Device Hierarchy.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">How a Modern Computer Works</h2>
+                <span class="card-badge">1.18</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/How a Modern Computer Works.png" alt="How a Modern Computer Works" data-full="OS diagrams/How a Modern Computer Works.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Symmetric Multiprocessing Architecture</h2>
+                <span class="card-badge">1.21</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Symmetric Multiprocessing Architecture.png" alt="Symmetric Multiprocessing Architecture" data-full="OS diagrams/Symmetric Multiprocessing Architecture.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">A Dual-Core Design</h2>
+                <span class="card-badge">1.22</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/A Dual-Core Design.png" alt="A Dual-Core Design" data-full="OS diagrams/A Dual-Core Design.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Memory Layout for Multiprogrammed System</h2>
+                <span class="card-badge">1.26</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Memory Layout for Multiprogrammed System.png" alt="Memory Layout for Multiprogrammed System" data-full="OS diagrams/Memory Layout for Multiprogrammed System.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Transition from User to Kernel Mode</h2>
+                <span class="card-badge">1.28</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Transition from User to Kernel Mode.png" alt="Transition from User to Kernel Mode" data-full="OS diagrams/Transition from User to Kernel Mode.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Computing Environments – Client-Server</h2>
+                <span class="card-badge">1.40</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Computing Environments – Client-Server.png" alt="Computing Environments – Client-Server" data-full="OS diagrams/Computing Environments – Client-Server.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Computing Environments – Cloud Computing</h2>
+                <span class="card-badge">1.42</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Computing Environments – Cloud Computing.png" alt="Computing Environments – Cloud Computing" data-full="OS diagrams/Computing Environments – Cloud Computing.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">A View of Operating System Services</h2>
+                <span class="card-badge">2.6</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/A View of Operating System Services.png" alt="A View of Operating System Services" data-full="OS diagrams/A View of Operating System Services.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">API – System Call – OS Relationship</h2>
+                <span class="card-badge">2.11</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/API – System Call – OS Relationship.png" alt="API – System Call – OS Relationship" data-full="OS diagrams/API – System Call – OS Relationship.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">The Role of the Linker and Loader</h2>
+                <span class="card-badge">2.19</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/The Role of the Linker and Loader.png" alt="The Role of the Linker and Loader" data-full="OS diagrams/The Role of the Linker and Loader.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Process in Memory</h2>
+                <span class="card-badge">2.29</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Process in Memory.png" alt="Process in Memory" data-full="OS diagrams/Process in Memory.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Memory Layout of a C Program</h2>
+                <span class="card-badge">2.30</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Memory Layout of a C Program.png" alt="Memory Layout of a C Program" data-full="OS diagrams/Memory Layout of a C Program.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Process Control Block (PCB)</h2>
+                <span class="card-badge">2.33 - 4.19</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Process Control Block (PCB).png" alt="Process Control Block (PCB)" data-full="OS diagrams/Process Control Block (PCB).png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Representation of Process Scheduling</h2>
+                <span class="card-badge">2.37 - 4.23</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Representation of Process Scheduling.png" alt="Representation of Process Scheduling" data-full="OS diagrams/Representation of Process Scheduling.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">CPU Switch From Process to Process</h2>
+                <span class="card-badge">2.38 - 4.26 - (4.27) - 428</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/CPU Switch From Process to Process.png" alt="CPU Switch From Process to Process" data-full="OS diagrams/CPU Switch From Process to Process.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Process Creation</h2>
+                <span class="card-badge">2.43 - 4.35</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Process Creation.png" alt="Process Creation" data-full="OS diagrams/Process Creation.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">A two-State Process Model</h2>
+                <span class="card-badge">4.6</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/A two-State Process Model.png" alt="A two-State Process Model" data-full="OS diagrams/A two-State Process Model.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">A Five-State Process Model</h2>
+                <span class="card-badge">4.7 - 4.8</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/A Five-State Process Model.png" alt="A Five-State Process Model" data-full="OS diagrams/A Five-State Process Model.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Single Blocked Queue</h2>
+                <span class="card-badge">4.9</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Single Blocked Queue.png" alt="Single Blocked Queue" data-full="OS diagrams/Single Blocked Queue.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Multiple Blocked Queues</h2>
+                <span class="card-badge">4.10</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Multiple Blocked Queues.png" alt="Multiple Blocked Queues" data-full="OS diagrams/Multiple Blocked Queues.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">A Seven-State Model: Suspended Processes</h2>
+                <span class="card-badge">4.13</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/A Seven-State Model Suspended Processes.png" alt="A Seven-State Model: Suspended Processes" data-full="OS diagrams/A Seven-State Model Suspended Processes.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">UNIX Process State Transition Diagram</h2>
+                <span class="card-badge">4.15</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/UNIX Process State Transition Diagram.png" alt="UNIX Process State Transition Diagram" data-full="OS diagrams/UNIX Process State Transition Diagram.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Windows NT Refineme</h2>
+                <span class="card-badge">4.16</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Windows NT Refineme.png" alt="Windows NT Refineme" data-full="OS diagrams/Windows NT Refineme.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Swappingnt</h2>
+                <span class="card-badge">4.17</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Swappingnt.png" alt="Swappingnt" data-full="OS diagrams/Swappingnt.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Schedulers and Dispatcher</h2>
+                <span class="card-badge">4.31</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Schedulers and Dispatcher.png" alt="Schedulers and Dispatcher" data-full="OS diagrams/Schedulers and Dispatcher.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Dispatcher</h2>
+                <span class="card-badge">5.5</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Dispatcher.png" alt="Dispatcher" data-full="OS diagrams/Dispatcher.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Multithreaded Multicore System</h2>
+                <span class="card-badge">6.11</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Multithreaded Multicore System.png" alt="Multithreaded Multicore System" data-full="OS diagrams/Multithreaded Multicore System.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Real-Time CPU Scheduling</h2>
+                <span class="card-badge">6.15</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Real-Time CPU Scheduling.png" alt="Real-Time CPU Scheduling" data-full="OS diagrams/Real-Time CPU Scheduling.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Interrupt Latency</h2>
+                <span class="card-badge">6.16</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Interrupt Latency.png" alt="Interrupt Latency" data-full="OS diagrams/Interrupt Latency.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Dispatch Latency</h2>
+                <span class="card-badge">6.17</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Dispatch Latency.png" alt="Dispatch Latency" data-full="OS diagrams/Dispatch Latency.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Priority-based Scheduling</h2>
+                <span class="card-badge">6.18</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Priority-based Scheduling.png" alt="Priority-based Scheduling" data-full="OS diagrams/Priority-based Scheduling.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Communications Models</h2>
+                <span class="card-badge">7.3</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Communications Models.png" alt="Communications Models" data-full="OS diagrams/Communications Models.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Local Procedure Calls in Windows</h2>
+                <span class="card-badge">7.20</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Local Procedure Calls in Windows.png" alt="Local Procedure Calls in Windows" data-full="OS diagrams/Local Procedure Calls in Windows.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Network-Attached Storage</h2>
+                <span class="card-badge">8.20</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Network-Attached Storage.png" alt="Network-Attached Storage" data-full="OS diagrams/Network-Attached Storage.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Storage Area Network</h2>
+                <span class="card-badge">8.23</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Storage Area Network.png" alt="Storage Area Network" data-full="OS diagrams/Storage Area Network.png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">RAID (0 + 1) and (1 + 0)</h2>
+                <span class="card-badge">8.27</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/RAID (0 + 1) and (1 + 0).png" alt="RAID (0 + 1) and (1 + 0)" data-full="OS diagrams/RAID (0 + 1) and (1 + 0).png">
+            </div>
+        </article>
+        <article class="card">
+            <div class="card-header">
+                <h2 class="card-title">Schematic view of a Monitor</h2>
+                <span class="card-badge">9.37</span>
+            </div>
+            <div class="card-image-container" onclick="openLightbox(this)">
+                <img class="card-image" src="OS diagrams/Schematic view of a Monitor.png" alt="Schematic view of a Monitor" data-full="OS diagrams/Schematic view of a Monitor.png">
+            </div>
+        </article>
+    </main>
+
+    <div class="lightbox" id="lightbox" onclick="if(event.target === this) closeLightbox()">
+        <div class="lightbox-content">
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <img class="lightbox-img" id="lightbox-img" src="" alt="Full screen diagram">
+        </div>
+    </div>
+
+    <script>
+        function openLightbox(container) {
+            const img = container.querySelector('.card-image');
+            if (!img) return;
+            
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = img.getAttribute('data-full');
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+</html>
