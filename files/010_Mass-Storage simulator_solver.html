@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Disk Scheduling Algorithms Simulator & Solver</title>
+    <title>OS Disk Tools Suite</title>
     <!-- Tailwind CSS for high-fidelity UI styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons for clean aesthetic iconography -->
@@ -16,6 +16,13 @@
         .code-font {
             font-family: 'JetBrains Mono', monospace;
         }
+        .app-view {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen">
@@ -27,29 +34,331 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100">
-                    <i data-lucide="disc" class="w-6 h-6 animate-spin-slow"></i>
+                    <i data-lucide="layers" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Disk Scheduling Solver</h1>
-                    <p class="text-xs text-slate-500 font-medium">Interactive Visualizer & Step-by-Step Mathematical Solver</p>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">OS Disk Tools Suite</h1>
+                    <p class="text-xs text-slate-500 font-medium">Performance & Scheduling Solver</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="resetToPreset()" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all border border-slate-200">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to Assignment Preset
+            
+            <!-- App Switcher Nav -->
+            <div class="flex bg-slate-100 p-1 rounded-xl shadow-inner">
+                <button onclick="switchApp('perf')" id="nav-perf" class="py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 bg-white text-indigo-600 shadow-sm">
+                    <i data-lucide="cpu" class="w-4 h-4"></i> Performance
+                </button>
+                <button onclick="switchApp('sched')" id="nav-sched" class="py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700">
+                    <i data-lucide="disc" class="w-4 h-4"></i> Scheduling
                 </button>
             </div>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Performance App View -->
+    <div id="app-perf" class="app-view block">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 flex justify-end">
+            <button onclick="resetPerfToPreset()" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all border border-slate-200 shadow-sm">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Performance Preset
+            </button>
+        </div>
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            
         
         <!-- Error Alerts Container -->
-        <div id="error-container" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start gap-3 shadow-sm">
+        <div id="perf-error-container" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start gap-3 shadow-sm">
             <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
             <div>
                 <h3 class="text-sm font-bold text-red-800">Invalid Inputs Detected</h3>
-                <p id="error-message" class="text-xs text-red-700 mt-1"></p>
+                <p id="perf-error-message" class="text-xs text-red-700 mt-1"></p>
+            </div>
+        </div>
+
+        <!-- Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Panel: Input Parameters (Col 5) -->
+            <section class="lg:col-span-5 space-y-6">
+                
+                <!-- Disk Specifications Card -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                        <i data-lucide="database" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="font-bold text-slate-800">Disk Specifications</h2>
+                    </div>
+
+                    <!-- Input: Average Seek Time -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Average Seek Time (T<sub>s</sub>)</label>
+                        <div class="relative">
+                            <input type="number" step="0.1" id="input-seek" value="14" oninput="triggerPerfSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">MS</span>
+                        </div>
+                    </div>
+
+                    <!-- Input: Rotation Rate -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Rotation Rate (R)</label>
+                        <div class="relative">
+                            <input type="number" id="input-rotation" value="7200" oninput="triggerPerfSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">RPM</span>
+                        </div>
+                    </div>
+
+                    <!-- 3-Part Transfer Rate Input with Binary Prefixes (1024) -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Transfer Rate (Value | Prefix | Unit)</label>
+                        <div class="grid grid-cols-12 gap-2">
+                            <!-- 1. Numeric Value -->
+                            <div class="col-span-5">
+                                <input type="number" step="0.001" id="input-transfer" value="4" oninput="triggerPerfSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" placeholder="Value">
+                            </div>
+                            <!-- 2. Binary Prefix Dropdown (1024 base) -->
+                            <div class="col-span-3">
+                                <select id="input-transfer-prefix" onchange="triggerPerfSolve()" class="w-full px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                                    <option value="1">None</option>
+                                    <option value="1024">K (1024)</option>
+                                    <option value="1048576" selected>M (1024^2)</option>
+                                    <option value="1073741824">G (1024^3)</option>
+                                </select>
+                            </div>
+                            <!-- 3. Unit Dropdown (bit, Byte) -->
+                            <div class="col-span-4">
+                                <select id="input-transfer-unit" onchange="triggerPerfSolve()" class="w-full px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                                    <option value="bit">bit/sec</option>
+                                    <option value="Byte" selected>Byte/sec</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input: Controller Overhead -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Controller Overhead (C)</label>
+                        <div class="relative">
+                            <input type="number" step="0.1" id="input-overhead" value="6.5" oninput="triggerPerfSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-semibold">MS</span>
+                        </div>
+                    </div>
+
+                    <!-- Row: Sectors per track & Sector Size with Unit selector -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Sectors/Track</label>
+                            <input type="number" id="input-sectors" value="64" oninput="triggerPerfSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Sector Size</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="input-secsize" value="512" oninput="triggerPerfSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                                <select id="input-secsize-unit" onchange="triggerPerfSolve()" class="w-24 px-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                                    <option value="b">b (bits)</option>
+                                    <option value="B" selected>B (Bytes)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Query Specific Parameters -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                        <i data-lucide="help-circle" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="font-bold text-slate-800">Target Request Parameters</h2>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Consecutive Sectors</label>
+                            <input type="number" id="input-target-sectors" value="32" oninput="syncTargetSectors()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Total Size (KB)</label>
+                            <input type="number" step="0.001" id="input-target-kb" value="16" oninput="syncTargetKB()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 italic">Editing one will dynamically calculate the other based on Sector Size.</p>
+                </div>
+
+                <!-- Intermediate Physics Metrics -->
+                <div class="bg-indigo-950 text-indigo-200 p-6 rounded-2xl shadow-md space-y-4">
+                    <div class="flex items-center gap-2 pb-3 border-b border-indigo-900">
+                        <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i>
+                        <h2 class="font-bold text-white">Calculated Disk Dynamics</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <span class="block text-indigo-400 font-bold uppercase tracking-wider mb-0.5">Full Rotation Time</span>
+                            <span id="metric-rotation-time" class="text-sm font-bold text-white code-font">-</span>
+                        </div>
+                        <div>
+                            <span class="block text-indigo-400 font-bold uppercase tracking-wider mb-0.5">Rotational Latency (T<sub>r</sub>)</span>
+                            <span id="metric-rot-latency" class="text-sm font-bold text-white code-font">-</span>
+                        </div>
+                        <div class="col-span-2">
+                            <span class="block text-indigo-400 font-bold uppercase tracking-wider mb-0.5">Raw Transfer Rate (Converted)</span>
+                            <span id="metric-raw-rate" class="text-sm font-bold text-white code-font">-</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right Panel: Step-by-Step Mathematical Solver (Col 7) -->
+            <section class="lg:col-span-7 space-y-6">
+                
+
+
+                <!-- Part 1: Read Single Sector Solver -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Question 1</span>
+                            <h2 class="text-lg font-bold text-slate-800 mt-0.5">Average Time to Read a Single Sector</h2>
+                        </div>
+                        <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-xl text-center shadow-inner">
+                            <div class="text-[9px] uppercase font-bold tracking-wider">Average Duration</div>
+                            <div class="text-xl font-black code-font" id="result-q1">-</div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <!-- Step-by-step math cards -->
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                                <div class="font-bold text-xs text-slate-400 uppercase tracking-wider">General Timing Equation:</div>
+                                <div class="code-font text-slate-800 font-semibold">
+                                    T<sub>avg</sub> = Seek Time (T<sub>s</sub>) + Rotational Latency (T<sub>r</sub>) + Transfer Time (T<sub>tr</sub>) + Controller Overhead (C)
+                                </div>
+                            </div>
+
+                            <div class="space-y-2.5 pl-2">
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">1</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Average Seek Time (T<sub>s</sub>):</p>
+                                        <p class="text-xs text-slate-500 code-font" id="q1-step-seek">-</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">2</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Average Rotational Latency (T<sub>r</sub>):</p>
+                                        <p class="text-xs text-slate-500 mt-1">Calculated as half the time of one complete revolution:</p>
+                                        <div class="text-xs text-slate-600 font-semibold bg-slate-50 p-2.5 rounded-lg border border-slate-200/50 mt-1.5 code-font whitespace-pre-line" id="q1-step-rot">
+                                            -
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">3</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Sector Transfer Time (T<sub>tr</sub>):</p>
+                                        <div class="text-xs text-slate-600 font-semibold bg-slate-50 p-2.5 rounded-lg border border-slate-200/50 mt-1.5 code-font whitespace-pre-line" id="q1-step-transfer">
+                                            -
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">4</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Controller Overhead (C):</p>
+                                        <p class="text-xs text-slate-500 code-font" id="q1-step-overhead">-</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summation Block -->
+                            <div class="pt-4 border-t border-slate-100">
+                                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Summing up the values:</div>
+                                <div id="q1-math-sum" class="font-semibold text-slate-800 bg-indigo-50/40 p-3 rounded-xl border border-indigo-100/50 code-font">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Part 2: Read Consecutive Sectors Solver -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Question 2</span>
+                            <h2 class="text-lg font-bold text-slate-800 mt-0.5">Average Time to Read Consecutive Sectors</h2>
+                        </div>
+                        <div class="bg-indigo-100 text-indigo-800 px-4 py-2 rounded-xl text-center shadow-inner">
+                            <div class="text-[9px] uppercase font-bold tracking-wider">Average Duration</div>
+                            <div class="text-xl font-black code-font" id="result-q2">-</div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 space-y-4">
+                        <!-- Step-by-step math cards -->
+                        <div class="space-y-3 text-sm">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5">
+                                <div class="font-bold text-xs text-slate-400 uppercase tracking-wider">Sequential Physical Logic:</div>
+                                <p class="text-xs text-slate-600 leading-relaxed">
+                                    Since the sectors are <strong>consecutive (on the same track & cylinder)</strong>, we perform the <strong>Seek Operation once</strong>, wait for the <strong>Rotational Latency once</strong> to find the first sector, and then read all sectors sequentially in one continuous sweep.
+                                </p>
+                            </div>
+
+                            <div class="space-y-2.5 pl-2">
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">1</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Initial Overhead Components (Unchanged):</p>
+                                        <p class="text-xs text-slate-500 code-font" id="q2-step-overhead-base">-</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start gap-2">
+                                    <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-md mt-0.5 code-font">2</span>
+                                    <div>
+                                        <p class="font-semibold text-slate-700">Cumulative Consecutive Transfer Time (T<sub>tr_total</sub>):</p>
+                                        <div class="text-xs text-slate-600 font-semibold bg-slate-50 p-2.5 rounded-lg border border-slate-200/50 mt-1.5 code-font whitespace-pre-line" id="q2-step-transfer">
+                                            -
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Summation Block -->
+                            <div class="pt-4 border-t border-slate-100">
+                                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Summing up the values:</div>
+                                <div id="q2-math-sum" class="font-semibold text-slate-800 bg-indigo-50/40 p-3 rounded-xl border border-indigo-100/50 code-font">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+    
+        </main>
+    </div>
+
+    <!-- Scheduling App View -->
+    <div id="app-sched" class="app-view hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 flex justify-end">
+            <button onclick="resetSchedToPreset()" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all border border-slate-200 shadow-sm">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset Scheduling Preset
+            </button>
+        </div>
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            
+        
+        <!-- Error Alerts Container -->
+        <div id="sched-error-container" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start gap-3 shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+                <h3 class="text-sm font-bold text-red-800">Invalid Inputs Detected</h3>
+                <p id="sched-error-message" class="text-xs text-red-700 mt-1"></p>
             </div>
         </div>
 
@@ -70,7 +379,7 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Total Cylinders (Size)</label>
                         <div class="relative">
-                            <input type="number" id="input-cylinders" value="5000" oninput="triggerSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <input type="number" id="input-cylinders" value="5000" oninput="triggerSchedSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                             <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">(0 to 4999)</span>
                         </div>
                     </div>
@@ -79,11 +388,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Current Head</label>
-                            <input type="number" id="input-current" value="300" oninput="triggerSolve()" class="w-full px-3 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl text-sm font-bold text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <input type="number" id="input-current" value="300" oninput="triggerSchedSolve()" class="w-full px-3 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl text-sm font-bold text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Previous Head</label>
-                            <input type="number" id="input-previous" value="250" oninput="triggerSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <input type="number" id="input-previous" value="250" oninput="triggerSchedSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
                         </div>
                     </div>
                     <p class="text-[11px] text-slate-400 italic">Moving inward (increasing direction: 250 → 300) since Current &ge; Previous.</p>
@@ -94,7 +403,7 @@
                             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Request Queue</label>
                             <span id="queue-count" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 requests</span>
                         </div>
-                        <textarea id="input-queue" rows="3" oninput="triggerSolve()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold code-font focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all leading-relaxed">2520, 1312, 2396, 2900, 453, 1719, 243, 1354, 4977, 3583</textarea>
+                        <textarea id="input-queue" rows="3" oninput="triggerSchedSolve()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold code-font focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all leading-relaxed">2520, 1312, 2396, 2900, 453, 1719, 243, 1354, 4977, 3583</textarea>
                         <p class="text-[11px] text-slate-400 mt-1">Separate cylinder requests with commas.</p>
                     </div>
                 </div>
@@ -218,23 +527,283 @@
 
         </div>
 
-    </main>
+    
+        </main>
+        
+        <!-- Interactive Tooltip Box element for SVG Hovering -->
+        <div id="svg-tooltip" class="absolute hidden bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl border border-slate-800 pointer-events-none z-50 transition-opacity duration-150 flex flex-col gap-1">
+        </div>
+    </div>
 
     <footer class="bg-white border-t border-slate-200 mt-16 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-400 text-xs font-medium">
-            <p>Disk Arm Motion Visualizer — Academic Problem Solver.</p>
-            <p class="mt-1">Correctly matches 5000 cylinder bounds and direction changes with accurate step-by-step vector graphics representation.</p>
+            <p>OS Disk Tools Suite — Integrated Academic Problem Solver.</p>
         </div>
     </footer>
 
-    <!-- Interactive Tooltip Box element for SVG Hovering -->
-    <div id="svg-tooltip" class="absolute hidden bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl border border-slate-800 pointer-events-none z-50 transition-opacity duration-150 flex flex-col gap-1">
-        <!-- Content will be inserted dynamically by SVG script -->
-    </div>
-
     <script>
+        
+        // --- DATA STATE MANAGEMENT ---
+        let perfState = {
+            seekTime: 14.0,           // in ms
+            rotationRate: 7200,       // in RPM
+            transferRate: 4.0,        // numeric value
+            transferPrefix: 1048576,  // None (1), K (1024), M (1048576), G (1073741824)
+            transferUnit: 'Byte',     // 'bit' or 'Byte'
+            controllerOverhead: 6.5,  // in ms
+            sectorsPerTrack: 64,
+            sectorSize: 512,          // numeric value
+            sectorSizeUnit: 'B',      // 'b' (bits) or 'B' (Bytes)
+            targetSectors: 32,        // number of sequential sectors to read
+            method: 'rate'            // 'rate' (Method A) or 'fraction' (Method B)
+        };
+
+        const PERF_PRESETS = {
+            seekTime: 14.0,
+            rotationRate: 7200,
+            transferRate: 4.0,
+            transferPrefix: 1048576,
+            transferUnit: 'Byte',
+            controllerOverhead: 6.5,
+            sectorsPerTrack: 64,
+            sectorSize: 512,
+            sectorSizeUnit: 'B',
+            targetSectors: 32,
+            method: 'rate'
+        };
+
+        // --- MATH INTERACTION WORKFLOWS ---
+
+        function getSectorSizeInBytes() {
+            const rawSecSize = parseInt(document.getElementById('input-secsize').value) || 512;
+            const secSizeUnit = document.getElementById('input-secsize-unit').value;
+            return (secSizeUnit === 'b') ? (rawSecSize / 8) : rawSecSize;
+        }
+
+        function syncTargetSectors() {
+            const rawSectors = parseInt(document.getElementById('input-target-sectors').value);
+            if (!isNaN(rawSectors) && rawSectors >= 0) {
+                perfState.targetSectors = rawSectors;
+                const sectorSizeInBytes = getSectorSizeInBytes();
+                const kbValue = (rawSectors * sectorSizeInBytes) / 1024;
+                document.getElementById('input-target-kb').value = kbValue.toFixed(4);
+            }
+            triggerPerfSolve();
+        }
+
+        function syncTargetKB() {
+            const rawKB = parseFloat(document.getElementById('input-target-kb').value);
+            if (!isNaN(rawKB) && rawKB >= 0) {
+                const sectorSizeInBytes = getSectorSizeInBytes();
+                const sectorValue = Math.round((rawKB * 1024) / sectorSizeInBytes);
+                document.getElementById('input-target-sectors').value = sectorValue;
+                perfState.targetSectors = sectorValue;
+            }
+            triggerPerfSolve();
+        }
+
+        function setPerfMethod(methodId) {
+            perfState.method = 'rate'; // Forced to Method A
+            triggerPerfSolve();
+        }
+
+        function resetPerfToPreset() {
+            document.getElementById('input-seek').value = PERF_PRESETS.seekTime;
+            document.getElementById('input-rotation').value = PERF_PRESETS.rotationRate;
+            document.getElementById('input-transfer').value = PERF_PRESETS.transferRate;
+            document.getElementById('input-transfer-prefix').value = PERF_PRESETS.transferPrefix;
+            document.getElementById('input-transfer-unit').value = PERF_PRESETS.transferUnit;
+            document.getElementById('input-overhead').value = PERF_PRESETS.controllerOverhead;
+            document.getElementById('input-sectors').value = PERF_PRESETS.sectorsPerTrack;
+            document.getElementById('input-secsize').value = PERF_PRESETS.sectorSize;
+            document.getElementById('input-secsize-unit').value = PERF_PRESETS.sectorSizeUnit;
+            document.getElementById('input-target-sectors').value = PERF_PRESETS.targetSectors;
+            
+            // Re-sync input-target-kb
+            const sectorSizeInBytes = (PERF_PRESETS.sectorSizeUnit === 'b') ? (PERF_PRESETS.sectorSize / 8) : PERF_PRESETS.sectorSize;
+            const kbVal = (PERF_PRESETS.targetSectors * sectorSizeInBytes) / 1024;
+            document.getElementById('input-target-kb').value = kbVal;
+
+            setPerfMethod(PERF_PRESETS.method);
+        }
+
+        function triggerPerfSolve() {
+            // Read values from form input fields
+            const rawSeek = parseFloat(document.getElementById('input-seek').value);
+            const rawRotation = parseInt(document.getElementById('input-rotation').value);
+            const rawTransfer = parseFloat(document.getElementById('input-transfer').value);
+            const rawTransferPrefix = parseInt(document.getElementById('input-transfer-prefix').value);
+            const rawTransferUnit = document.getElementById('input-transfer-unit').value;
+            const rawOverhead = parseFloat(document.getElementById('input-overhead').value);
+            const rawSectors = parseInt(document.getElementById('input-sectors').value);
+            const rawSecSize = parseInt(document.getElementById('input-secsize').value);
+            const rawSecSizeUnit = document.getElementById('input-secsize-unit').value;
+            const rawTargetSectors = parseInt(document.getElementById('input-target-sectors').value);
+
+            // Validation Logic
+            let errors = [];
+            if (isNaN(rawSeek) || rawSeek < 0) errors.push("Seek time must be a positive number.");
+            if (isNaN(rawRotation) || rawRotation <= 0) errors.push("Rotation Speed must be greater than 0 RPM.");
+            if (isNaN(rawTransfer) || rawTransfer <= 0) errors.push("Transfer Rate value must be greater than 0.");
+            if (isNaN(rawOverhead) || rawOverhead < 0) errors.push("Controller overhead must be a positive number.");
+            if (isNaN(rawSectors) || rawSectors <= 0) errors.push("Sectors per track must be at least 1.");
+            if (isNaN(rawSecSize) || rawSecSize <= 0) errors.push("Sector size must be greater than 0.");
+            if (isNaN(rawTargetSectors) || rawTargetSectors < 0) errors.push("Target sectors must be a non-negative integer.");
+
+            const errorContainer = document.getElementById('perf-error-container');
+            if (errors.length > 0) {
+                errorContainer.classList.remove('hidden');
+                document.getElementById('perf-error-message').innerHTML = errors.map(err => `• ${err}`).join('<br>');
+                return; // halt execution
+            } else {
+                errorContainer.classList.add('hidden');
+            }
+
+            // Bind values to active state object
+            perfState.seekTime = rawSeek;
+            perfState.rotationRate = rawRotation;
+            perfState.transferRate = rawTransfer;
+            perfState.transferPrefix = rawTransferPrefix;
+            perfState.transferUnit = rawTransferUnit;
+            perfState.controllerOverhead = rawOverhead;
+            perfState.sectorsPerTrack = rawSectors;
+            perfState.sectorSize = rawSecSize;
+            perfState.sectorSizeUnit = rawSecSizeUnit;
+            perfState.targetSectors = rawTargetSectors;
+
+            // Run solving procedures
+            solveDiskPerformance();
+        }
+
+        // --- CALCULATION AND INTERACTIVE STEP RENDERING ENGINE ---
+
+        function solveDiskPerformance() {
+            // Convert Sector Size to Bytes
+            const sectorSizeInBytes = (perfState.sectorSizeUnit === 'b') ? (perfState.sectorSize / 8) : perfState.sectorSize;
+            
+            // Convert Transfer Rate to Bytes/sec
+            // multiplier is 0.125 if 'bit' (divide by 8) and 1.0 if 'Byte'
+            const unitMultiplier = (perfState.transferUnit === 'bit') ? 0.125 : 1.0;
+            const rawTransferRateBytesSec = perfState.transferRate * perfState.transferPrefix * unitMultiplier;
+
+            // General intermediate variables
+            const rotationTimeSeconds = 60 / perfState.rotationRate;               // time for one full rotation in seconds
+            const rotationTimeMs = rotationTimeSeconds * 1000;                 // time for one full rotation in ms
+            const avgRotationalLatencyMs = rotationTimeMs / 2;                 // T_r (half of a rotation)
+
+            // Dynamic Prefix Unit labels for text formatting (Binary Bases 1024)
+            let prefixLabel = "";
+            if (perfState.transferPrefix === 1024) prefixLabel = "K";
+            else if (perfState.transferPrefix === 1048576) prefixLabel = "M";
+            else if (perfState.transferPrefix === 1073741824) prefixLabel = "G";
+
+            const speedUnitString = `${prefixLabel}${perfState.transferUnit === 'bit' ? 'b' : 'B'}/s`;
+
+            // Render dynamics badges
+            document.getElementById('metric-rotation-time').innerText = `${rotationTimeMs.toFixed(3)} ms`;
+            document.getElementById('metric-rot-latency').innerText = `${avgRotationalLatencyMs.toFixed(3)} ms`;
+            document.getElementById('metric-raw-rate').innerText = `${rawTransferRateBytesSec.toLocaleString()} Bytes/second (${perfState.transferRate} ${speedUnitString})`;
+
+            // Formulate dynamic explanations for unit conversions
+            let sectorConversionMath = "";
+            if (perfState.sectorSizeUnit === 'b') {
+                sectorConversionMath = `• Sector size unit is in bits. Convert to Bytes first:\n  Sector Size = ${perfState.sectorSize} bits / 8 = ${sectorSizeInBytes} Bytes\n\n`;
+            }
+
+            let transferConversionMath = "";
+            if (perfState.transferUnit === 'bit') {
+                transferConversionMath = `• Transfer rate unit is in bits/sec. Convert to Bytes/sec first:\n  Rate = (${perfState.transferRate} * ${perfState.transferPrefix.toLocaleString()}) bits/sec\n  Rate = ${(perfState.transferRate * perfState.transferPrefix).toLocaleString()} bits/sec\n  Rate = ${(perfState.transferRate * perfState.transferPrefix).toLocaleString()} / 8 = ${rawTransferRateBytesSec.toLocaleString()} Bytes/sec\n\n`;
+            } else {
+                transferConversionMath = `• Transfer rate in Bytes/sec:\n  Rate = ${perfState.transferRate} * ${perfState.transferPrefix.toLocaleString()} Bytes/sec = ${rawTransferRateBytesSec.toLocaleString()} Bytes/sec\n\n`;
+            }
+
+            // --- RESOLVE QUESTION 1: READ SINGLE SECTOR ---
+            let t_tr_single_ms = 0;
+            let singleTransferExplanation = "";
+
+            if (perfState.method === 'rate') {
+                // Method A: T_tr = SectorSize / TransferRate
+                const t_tr_single_sec = sectorSizeInBytes / rawTransferRateBytesSec;
+                t_tr_single_ms = t_tr_single_sec * 1000;
+
+                singleTransferExplanation = `Formula: T_tr = Sector Size (Bytes) / Transfer Rate (Bytes/sec)
+${sectorConversionMath}${transferConversionMath}T_tr = ${sectorSizeInBytes} Bytes / ${rawTransferRateBytesSec.toLocaleString()} Bytes/sec
+T_tr = ${t_tr_single_sec.toFixed(8)} seconds = ${t_tr_single_ms.toFixed(5)} ms`;
+            } else {
+                // Method B: T_tr = Full rotation time / Sectors per track
+                t_tr_single_ms = rotationTimeMs / perfState.sectorsPerTrack;
+
+                singleTransferExplanation = `Formula: T_tr = Full Rotation Time / Sectors per Track
+T_tr = ${rotationTimeMs.toFixed(3)} ms / ${perfState.sectorsPerTrack} sectors
+T_tr = ${t_tr_single_ms.toFixed(5)} ms`;
+            }
+
+            const totalQ1Ms = perfState.seekTime + avgRotationalLatencyMs + t_tr_single_ms + perfState.controllerOverhead;
+
+            // Populate DOM steps for Question 1
+            document.getElementById('result-q1').innerText = `${totalQ1Ms.toFixed(4)} ms`;
+            document.getElementById('q1-step-seek').innerText = `T_s = ${perfState.seekTime} ms (Given)`;
+            document.getElementById('q1-step-rot').innerText = `1 Rotation Time = 60 seconds / ${perfState.rotationRate} RPM = ${rotationTimeMs.toFixed(3)} ms
+T_r = 0.5 * ${rotationTimeMs.toFixed(3)} ms = ${avgRotationalLatencyMs.toFixed(3)} ms`;
+            document.getElementById('q1-step-transfer').innerText = singleTransferExplanation;
+            document.getElementById('q1-step-overhead').innerText = `C = ${perfState.controllerOverhead} ms (Given)`;
+            
+            document.getElementById('q1-math-sum').innerHTML = `
+                T_avg = T_s + T_r + T_tr + C <br>
+                T_avg = ${perfState.seekTime} ms + ${avgRotationalLatencyMs.toFixed(3)} ms + ${t_tr_single_ms.toFixed(5)} ms + ${perfState.controllerOverhead} ms <br>
+                <span class="text-indigo-600 font-bold text-base">= ${totalQ1Ms.toFixed(5)} ms</span>
+            `;
+
+            // --- RESOLVE QUESTION 2: READ CONSECUTIVE SECTORS ---
+            const totalReadSizeBytes = perfState.targetSectors * sectorSizeInBytes;
+            const totalReadSizeKB = totalReadSizeBytes / 1024;
+
+            let t_tr_multi_ms = 0;
+            let multiTransferExplanation = "";
+
+            if (perfState.method === 'rate') {
+                // Method A: Cumulative sequence Transfer
+                const t_tr_multi_sec = totalReadSizeBytes / rawTransferRateBytesSec;
+                t_tr_multi_ms = t_tr_multi_sec * 1000;
+
+                multiTransferExplanation = `Formula: T_tr_total = (Consecutive Sectors * Sector Size) / Transfer Rate
+${sectorConversionMath}${transferConversionMath}T_tr_total = (${perfState.targetSectors} * ${sectorSizeInBytes} Bytes) / ${rawTransferRateBytesSec.toLocaleString()} Bytes/sec
+T_tr_total = ${totalReadSizeBytes.toLocaleString()} Bytes / ${rawTransferRateBytesSec.toLocaleString()} Bytes/sec
+T_tr_total = ${t_tr_multi_sec.toFixed(6)} seconds = ${t_tr_multi_ms.toFixed(3)} ms`;
+            } else {
+                // Method B: Rotational sweep proportion
+                t_tr_multi_ms = (perfState.targetSectors / perfState.sectorsPerTrack) * rotationTimeMs;
+
+                multiTransferExplanation = `Formula: T_tr_total = (Consecutive Sectors / Sectors per Track) * Full Rotation Time
+T_tr_total = (${perfState.targetSectors} / ${perfState.sectorsPerTrack}) * ${rotationTimeMs.toFixed(3)} ms
+T_tr_total = ${(perfState.targetSectors / perfState.sectorsPerTrack).toFixed(4)} * ${rotationTimeMs.toFixed(3)} ms
+T_tr_total = ${t_tr_multi_ms.toFixed(3)} ms`;
+            }
+
+            const totalQ2Ms = perfState.seekTime + avgRotationalLatencyMs + t_tr_multi_ms + perfState.controllerOverhead;
+
+            // Populate DOM steps for Question 2
+            document.getElementById('result-q2').innerText = `${totalQ2Ms.toFixed(3)} ms`;
+            document.getElementById('q2-step-overhead-base').innerText = `Initial Overhead = T_s + T_r + C = ${perfState.seekTime} + ${avgRotationalLatencyMs.toFixed(3)} + ${perfState.controllerOverhead} = ${(perfState.seekTime + avgRotationalLatencyMs + perfState.controllerOverhead).toFixed(3)} ms`;
+            document.getElementById('q2-step-transfer').innerText = `Total sectors to transfer = ${perfState.targetSectors} (${totalReadSizeKB.toFixed(3)} KB)
+${multiTransferExplanation}`;
+            
+            document.getElementById('q2-math-sum').innerHTML = `
+                T_total = T_s + T_r + T_tr_total + C <br>
+                T_total = ${perfState.seekTime} ms + ${avgRotationalLatencyMs.toFixed(3)} ms + ${t_tr_multi_ms.toFixed(3)} ms + ${perfState.controllerOverhead} ms <br>
+                <span class="text-indigo-600 font-bold text-base">= ${totalQ2Ms.toFixed(3)} ms</span>
+            `;
+        }
+
+        // --- ONLOAD INITIALIZATION ---
+        function initPerf() {
+            setPerfMethod('rate'); // Sets default active visualization styling
+            lucide.createIcons();
+        }
+    
+        
         // --- DATA STATES ---
-        let state = {
+        let schedState = {
             totalCylinders: 5000,
             currentHead: 300,
             previousHead: 250,
@@ -270,7 +839,7 @@
         };
 
         // Preset values from original assignment image to allow full resets
-        const ASSIGNMENT_PRESET = {
+        const SCHED_PRESET = {
             totalCylinders: 5000,
             currentHead: 300,
             previousHead: 250,
@@ -280,8 +849,8 @@
         // --- SOLVER ALGORITHMS ---
 
         function solveFCFS() {
-            let path = [state.currentHead];
-            state.queue.forEach(q => path.push(q));
+            let path = [schedState.currentHead];
+            schedState.queue.forEach(q => path.push(q));
 
             let steps = [];
             let totalDistance = 0;
@@ -301,9 +870,9 @@
         }
 
         function solveSSTF() {
-            let path = [state.currentHead];
-            let remaining = [...state.queue];
-            let current = state.currentHead;
+            let path = [schedState.currentHead];
+            let remaining = [...schedState.queue];
+            let current = schedState.currentHead;
             let steps = [];
             let totalDistance = 0;
             let stepCounter = 1;
@@ -340,16 +909,16 @@
         }
 
         function solveSCAN() {
-            let path = [state.currentHead];
+            let path = [schedState.currentHead];
             let steps = [];
             let totalDistance = 0;
 
             // Determine direction based on previous head
-            let direction = (state.currentHead >= state.previousHead) ? 'up' : 'down';
-            let left = state.queue.filter(q => q < state.currentHead).sort((a,b) => b-a); // sorted descending for down pass
-            let right = state.queue.filter(q => q >= state.currentHead).sort((a,b) => a-b); // sorted ascending for up pass
+            let direction = (schedState.currentHead >= schedState.previousHead) ? 'up' : 'down';
+            let left = schedState.queue.filter(q => q < schedState.currentHead).sort((a,b) => b-a); // sorted descending for down pass
+            let right = schedState.queue.filter(q => q >= schedState.currentHead).sort((a,b) => a-b); // sorted ascending for up pass
 
-            let current = state.currentHead;
+            let current = schedState.currentHead;
             let stepCounter = 1;
 
             if (direction === 'up') {
@@ -363,9 +932,9 @@
                 });
 
                 // Reversing mechanism
-                if (state.scanMode === 'standard') {
+                if (schedState.scanMode === 'standard') {
                     // Standard SCAN must touch the boundary (totalCylinders - 1)
-                    let boundary = state.totalCylinders - 1;
+                    let boundary = schedState.totalCylinders - 1;
                     if (current !== boundary) {
                         let diff = Math.abs(boundary - current);
                         totalDistance += diff;
@@ -395,7 +964,7 @@
                 });
 
                 // Touch standard boundary 0 if selected
-                if (state.scanMode === 'standard') {
+                if (schedState.scanMode === 'standard') {
                     let boundary = 0;
                     if (current !== boundary) {
                         let diff = Math.abs(boundary - current);
@@ -420,15 +989,15 @@
         }
 
         function solveCSCAN() {
-            let path = [state.currentHead];
+            let path = [schedState.currentHead];
             let steps = [];
             let totalDistance = 0;
 
-            let direction = (state.currentHead >= state.previousHead) ? 'up' : 'down';
-            let left = state.queue.filter(q => q < state.currentHead).sort((a,b) => a-b); // Sorted ascending
-            let right = state.queue.filter(q => q >= state.currentHead).sort((a,b) => a-b); // Sorted ascending
+            let direction = (schedState.currentHead >= schedState.previousHead) ? 'up' : 'down';
+            let left = schedState.queue.filter(q => q < schedState.currentHead).sort((a,b) => a-b); // Sorted ascending
+            let right = schedState.queue.filter(q => q >= schedState.currentHead).sort((a,b) => a-b); // Sorted ascending
 
-            let current = state.currentHead;
+            let current = schedState.currentHead;
             let stepCounter = 1;
 
             if (direction === 'up') {
@@ -442,9 +1011,9 @@
                 });
 
                 // Wrap-around Logic
-                if (state.scanMode === 'standard') {
+                if (schedState.scanMode === 'standard') {
                     // Touch 4999 boundary first
-                    let boundaryMax = state.totalCylinders - 1;
+                    let boundaryMax = schedState.totalCylinders - 1;
                     if (current !== boundaryMax) {
                         let diff = Math.abs(boundaryMax - current);
                         totalDistance += diff;
@@ -454,7 +1023,7 @@
                     }
                     
                     // Jump to 0 boundary
-                    let jumpDiff = state.cscanWrap ? boundaryMax : 0;
+                    let jumpDiff = schedState.cscanWrap ? boundaryMax : 0;
                     totalDistance += jumpDiff;
                     path.push(0);
                     steps.push({ from: current, to: 0, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
@@ -463,7 +1032,7 @@
                     // C-LOOK Jump directly from largest request to smallest request
                     if (left.length > 0) {
                         let minLeft = left[0];
-                        let jumpDiff = state.cscanWrap ? Math.abs(minLeft - current) : 0;
+                        let jumpDiff = schedState.cscanWrap ? Math.abs(minLeft - current) : 0;
                         totalDistance += jumpDiff;
                         path.push(minLeft);
                         steps.push({ from: current, to: minLeft, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
@@ -494,7 +1063,7 @@
                 });
 
                 // Wrap-around Logic (downward)
-                if (state.scanMode === 'standard') {
+                if (schedState.scanMode === 'standard') {
                     // Reach 0 boundary
                     let boundaryMin = 0;
                     if (current !== boundaryMin) {
@@ -506,8 +1075,8 @@
                     }
 
                     // Jump back to 4999
-                    let boundaryMax = state.totalCylinders - 1;
-                    let jumpDiff = state.cscanWrap ? boundaryMax : 0;
+                    let boundaryMax = schedState.totalCylinders - 1;
+                    let jumpDiff = schedState.cscanWrap ? boundaryMax : 0;
                     totalDistance += jumpDiff;
                     path.push(boundaryMax);
                     steps.push({ from: current, to: boundaryMax, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
@@ -516,7 +1085,7 @@
                     // C-LOOK (downward sweep): Jump directly to largest request
                     if (right.length > 0) {
                         let maxRight = right[right.length - 1];
-                        let jumpDiff = state.cscanWrap ? Math.abs(maxRight - current) : 0;
+                        let jumpDiff = schedState.cscanWrap ? Math.abs(maxRight - current) : 0;
                         totalDistance += jumpDiff;
                         path.push(maxRight);
                         steps.push({ from: current, to: maxRight, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
@@ -541,7 +1110,7 @@
 
         // --- UI DRAWING & DOM MANIPULATION ---
 
-        function triggerSolve() {
+        function triggerSchedSolve() {
             // Read UI states
             const rawCylinders = parseInt(document.getElementById('input-cylinders').value);
             const rawCurrent = parseInt(document.getElementById('input-current').value);
@@ -584,28 +1153,28 @@
                 errors.push(`Queue requests [${outOfBoundsQueue.join(', ')}] are out of cylinder boundaries (0 to ${rawCylinders - 1}).`);
             }
 
-            const errorContainer = document.getElementById('error-container');
+            const errorContainer = document.getElementById('sched-error-container');
             if (errors.length > 0) {
                 errorContainer.classList.remove('hidden');
-                document.getElementById('error-message').innerHTML = errors.map(err => `• ${err}`).join('<br>');
+                document.getElementById('sched-error-message').innerHTML = errors.map(err => `• ${err}`).join('<br>');
                 return; // halt calculations
             } else {
                 errorContainer.classList.add('hidden');
             }
 
             // Commit to state
-            state.totalCylinders = rawCylinders;
-            state.currentHead = rawCurrent;
-            state.previousHead = rawPrevious;
-            state.queue = parsedQueue;
+            schedState.totalCylinders = rawCylinders;
+            schedState.currentHead = rawCurrent;
+            schedState.previousHead = rawPrevious;
+            schedState.queue = parsedQueue;
 
             document.getElementById('queue-count').innerText = `${parsedQueue.length} requests`;
 
             // Re-calculate algorithms
-            state.solutions.fcfs = solveFCFS();
-            state.solutions.sstf = solveSSTF();
-            state.solutions.scan = solveSCAN();
-            state.solutions.cscan = solveCSCAN();
+            schedState.solutions.fcfs = solveFCFS();
+            schedState.solutions.sstf = solveSSTF();
+            schedState.solutions.scan = solveSCAN();
+            schedState.solutions.cscan = solveCSCAN();
 
             // Refresh UI components
             updateActiveTabUI();
@@ -613,19 +1182,19 @@
         }
 
         function switchTab(tabId) {
-            state.activeTab = tabId;
+            schedState.activeTab = tabId;
             updateActiveTabUI();
         }
 
-        function resetToPreset() {
-            document.getElementById('input-cylinders').value = ASSIGNMENT_PRESET.totalCylinders;
-            document.getElementById('input-current').value = ASSIGNMENT_PRESET.currentHead;
-            document.getElementById('input-previous').value = ASSIGNMENT_PRESET.previousHead;
-            document.getElementById('input-queue').value = ASSIGNMENT_PRESET.queue.join(', ');
+        function resetSchedToPreset() {
+            document.getElementById('input-cylinders').value = SCHED_PRESET.totalCylinders;
+            document.getElementById('input-current').value = SCHED_PRESET.currentHead;
+            document.getElementById('input-previous').value = SCHED_PRESET.previousHead;
+            document.getElementById('input-queue').value = SCHED_PRESET.queue.join(', ');
             
-            state.scanMode = 'standard';
-            state.cscanWrap = true;
-            triggerSolve();
+            schedState.scanMode = 'standard';
+            schedState.cscanWrap = true;
+            triggerSchedSolve();
         }
 
         function updatePerformanceDashboard() {
@@ -633,8 +1202,8 @@
             container.innerHTML = '';
 
             // Find min seek to highlight as best
-            let sortedAlgos = Object.keys(state.solutions).map(key => {
-                return { key: key, dist: state.solutions[key].totalDistance };
+            let sortedAlgos = Object.keys(schedState.solutions).map(key => {
+                return { key: key, dist: schedState.solutions[key].totalDistance };
             });
             let minDistance = Math.min(...sortedAlgos.map(a => a.dist));
             let maxDistance = Math.max(...sortedAlgos.map(a => a.dist));
@@ -667,15 +1236,15 @@
             // Manage Active tabs classes
             ['fcfs', 'scan', 'cscan', 'sstf'].forEach(tab => {
                 const tabEl = document.getElementById(`tab-${tab}`);
-                if (state.activeTab === tab) {
+                if (schedState.activeTab === tab) {
                     tabEl.className = "flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-100 border border-indigo-500";
                 } else {
                     tabEl.className = "flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 bg-transparent hover:bg-slate-100 text-slate-600 border border-transparent";
                 }
             });
 
-            const currentSol = state.solutions[state.activeTab];
-            const details = algoDetails[state.activeTab];
+            const currentSol = schedState.solutions[schedState.activeTab];
+            const details = algoDetails[schedState.activeTab];
 
             if (!currentSol) return;
 
@@ -705,7 +1274,7 @@
                     badgeClass = "bg-indigo-600 text-white border-indigo-600 font-bold shadow-sm ring-4 ring-indigo-50";
                 } else if (isJump) {
                     badgeClass = "bg-red-50 text-red-700 border-red-200 font-semibold";
-                } else if (state.queue.includes(val)) {
+                } else if (schedState.queue.includes(val)) {
                     badgeClass = "bg-slate-100 text-slate-800 border-slate-200 font-semibold";
                 } else {
                     // Boundary values added by algorithm sweeps
@@ -742,7 +1311,7 @@
             
             // Collect all key landmark coordinates that need vertical gridlines (Mockup replica)
             // Starts with boundaries, starting position, and queued tasks
-            let landmarkValues = [0, ...state.queue, state.currentHead, state.totalCylinders - 1];
+            let landmarkValues = [0, ...schedState.queue, schedState.currentHead, schedState.totalCylinders - 1];
             // Include algorithm's complete path in case it features LOOK/SCAN extremes
             solution.path.forEach(p => landmarkValues.push(p));
             // De-duplicate & Sort ascending
@@ -750,7 +1319,7 @@
 
             // X scale mapping function
             function getX(val) {
-                return paddingLeft + (val / (state.totalCylinders - 1)) * (width - paddingLeft - paddingRight);
+                return paddingLeft + (val / (schedState.totalCylinders - 1)) * (width - paddingLeft - paddingRight);
             }
 
             // Generate Y dimensions dynamically based on step size so it mimics linear time going down
@@ -778,8 +1347,8 @@
             // 2. Draw Vertical grid lines + Cylinder text markers (with stagger layout to avoid overlaps)
             uniqueLandmarks.forEach((landmark, index) => {
                 const xPos = getX(landmark);
-                const isCurrentHead = landmark === state.currentHead;
-                const isBoundary = (landmark === 0 || landmark === state.totalCylinders - 1);
+                const isCurrentHead = landmark === schedState.currentHead;
+                const isBoundary = (landmark === 0 || landmark === schedState.totalCylinders - 1);
 
                 // Create the vertical lane line
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -1016,10 +1585,35 @@
         }
 
         // --- ONLOAD INITIALIZATION ---
-        window.onload = function() {
+        function initSched() {
             // Initiate full solving engine
-            triggerSolve();
+            triggerSchedSolve();
             lucide.createIcons();
+        }
+    
+        
+        function switchApp(appName) {
+            document.getElementById('app-perf').classList.add('hidden');
+            document.getElementById('app-sched').classList.add('hidden');
+            
+            document.getElementById('nav-perf').className = 'py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700';
+            document.getElementById('nav-sched').className = 'py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 text-slate-500 hover:text-slate-700';
+
+            if (appName === 'perf') {
+                document.getElementById('app-perf').classList.remove('hidden');
+                document.getElementById('nav-perf').className = 'py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 bg-white text-indigo-600 shadow-sm';
+            } else {
+                document.getElementById('app-sched').classList.remove('hidden');
+                document.getElementById('nav-sched').className = 'py-2 px-4 text-sm font-bold rounded-lg transition-all flex items-center gap-2 bg-white text-indigo-600 shadow-sm';
+                triggerSchedSolve(); // Re-render graphs in case of size changes
+            }
+        }
+
+        window.onload = function() {
+            initPerf();
+            initSched();
+            // ensure first view is active and initialized correctly
+            switchApp('perf');
         }
     </script>
 </body>
