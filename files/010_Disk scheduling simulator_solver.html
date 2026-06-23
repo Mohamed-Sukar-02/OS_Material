@@ -1,0 +1,1026 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disk Scheduling Algorithms Simulator & Solver</title>
+    <!-- Tailwind CSS for high-fidelity UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for clean aesthetic iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen">
+<!-- StudyVault Navigation -->
+<a href="../index.html" style="position:fixed;top:16px;left:16px;z-index:99999;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:linear-gradient(135deg,rgba(99,102,241,0.9),rgba(139,92,246,0.9));color:white;text-decoration:none;border-radius:12px;font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:13px;font-weight:600;letter-spacing:0.3px;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.15);box-shadow:0 4px 15px rgba(99,102,241,0.3),0 1px 3px rgba(0,0,0,0.2);transition:all 0.3s cubic-bezier(0.4,0,0.2,1);opacity:0.9;" onmouseover="this.style.opacity='1';this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 20px rgba(99,102,241,0.4),0 2px 5px rgba(0,0,0,0.2)'" onmouseout="this.style.opacity='0.9';this.style.transform='translateY(0)';this.style.boxShadow='0 4px 15px rgba(99,102,241,0.3),0 1px 3px rgba(0,0,0,0.2)'" id="back-to-home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>StudyVault Home</a>
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100">
+                    <i data-lucide="disc" class="w-6 h-6 animate-spin-slow"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Disk Scheduling Solver</h1>
+                    <p class="text-xs text-slate-500 font-medium">Interactive Visualizer & Step-by-Step Mathematical Solver</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="resetToPreset()" class="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2 rounded-xl transition-all border border-slate-200">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset to Assignment Preset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Error Alerts Container -->
+        <div id="error-container" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start gap-3 shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+            <div>
+                <h3 class="text-sm font-bold text-red-800">Invalid Inputs Detected</h3>
+                <p id="error-message" class="text-xs text-red-700 mt-1"></p>
+            </div>
+        </div>
+
+        <!-- Layout Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Panel: Configuration & Options (Col 4) -->
+            <section class="lg:col-span-4 space-y-6">
+                
+                <!-- Card 1: Parameters Setup -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                        <i data-lucide="sliders" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="font-bold text-slate-800">Simulation Parameters</h2>
+                    </div>
+
+                    <!-- Input: Cylinders -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Total Cylinders (Size)</label>
+                        <div class="relative">
+                            <input type="number" id="input-cylinders" value="5000" oninput="triggerSolve()" class="w-full pl-3 pr-16 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-400 font-medium">(0 to 4999)</span>
+                        </div>
+                    </div>
+
+                    <!-- Row: Current & Previous Head -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Current Head</label>
+                            <input type="number" id="input-current" value="300" oninput="triggerSolve()" class="w-full px-3 py-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl text-sm font-bold text-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Previous Head</label>
+                            <input type="number" id="input-previous" value="250" oninput="triggerSolve()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 italic">Moving inward (increasing direction: 250 → 300) since Current &ge; Previous.</p>
+
+                    <!-- Input: Pending Queue -->
+                    <div>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Request Queue</label>
+                            <span id="queue-count" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">10 requests</span>
+                        </div>
+                        <textarea id="input-queue" rows="3" oninput="triggerSolve()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold code-font focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all leading-relaxed">2520, 1312, 2396, 2900, 453, 1719, 243, 1354, 4977, 3583</textarea>
+                        <p class="text-[11px] text-slate-400 mt-1">Separate cylinder requests with commas.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2: Dashboard Quick Comparisons -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5 text-indigo-600"></i>
+                        <h2 class="font-bold text-slate-800">Performance Overview</h2>
+                    </div>
+                    <div class="space-y-3.5" id="performance-bars">
+                        <!-- Filled Dynamically -->
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Right Panel: Solver Sheets & Vector Graphs (Col 8) -->
+            <section class="lg:col-span-8 space-y-8">
+                
+                <!-- Tab Selector -->
+                <div class="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2">
+                    <button onclick="switchTab('fcfs')" id="tab-fcfs" class="flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span>1. FCFS</span>
+                    </button>
+                    <button onclick="switchTab('scan')" id="tab-scan" class="flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span>2. SCAN</span>
+                    </button>
+                    <button onclick="switchTab('cscan')" id="tab-cscan" class="flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span>3. C-SCAN</span>
+                    </button>
+                    <button onclick="switchTab('sstf')" id="tab-sstf" class="flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2">
+                        <span>4. SSTF</span>
+                    </button>
+                </div>
+
+                <!-- Active Content Card -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                    
+                    <!-- Content Header Info -->
+                    <div class="p-6 sm:p-8 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-slate-50 to-white">
+                        <div>
+                            <span id="algo-subtitle" class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Disk Scheduling Policy</span>
+                            <h2 id="algo-title" class="text-2xl font-bold text-slate-800 mt-0.5">Algorithm Name</h2>
+                            <p id="algo-desc" class="text-sm text-slate-500 mt-1">Brief summary of logic behavior.</p>
+                        </div>
+                        <div class="bg-indigo-600 text-white px-6 py-4 rounded-2xl text-center min-w-[160px] shadow-lg shadow-indigo-100 shrink-0">
+                            <div class="text-[10px] uppercase font-bold tracking-wider opacity-75">Total Seek Distance</div>
+                            <div class="text-3xl font-black mt-0.5 code-font" id="stat-total-distance">0</div>
+                            <div class="text-[10px] font-medium opacity-80">Cylinders</div>
+                        </div>
+                    </div>
+
+                    <!-- Sequence Trace Bar -->
+                    <div class="px-6 py-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row items-start md:items-center gap-2.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Service Sequence:</span>
+                        <div id="sequence-badges-container" class="flex flex-wrap gap-1.5 items-center">
+                            <!-- Populated with sequence badges dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Interactive Graph Container -->
+                    <div class="p-6 sm:p-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="line-chart" class="w-5 h-5 text-indigo-500"></i>
+                                Visual Head Movement Graph
+                            </h3>
+                            <span class="text-xs text-slate-400 flex items-center gap-1">
+                                <i data-lucide="mouse-pointer-click" class="w-3.5 h-3.5"></i>
+                                Hover dots or lines for interactive step details
+                            </span>
+                        </div>
+                        
+                        <!-- Responsive SVG Wrapper -->
+                        <div class="border border-slate-100 rounded-2xl bg-slate-50/50 overflow-x-auto p-2">
+                            <div class="min-w-[700px]">
+                                <svg id="visual-graph-svg" viewBox="0 0 1000 600" width="100%" height="100%" class="block select-none">
+                                    <!-- Dynamic content inserted by JavaScript -->
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Steps (Mathematical Solutions) -->
+                    <div class="p-6 sm:p-8 bg-slate-50 border-t border-slate-100 space-y-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i data-lucide="calculator" class="w-5 h-5 text-indigo-500"></i>
+                            Step-by-Step Mathematical Computation
+                        </h3>
+                        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-inner space-y-4">
+                            <!-- Header Formular -->
+                            <div>
+                                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">General Equation</div>
+                                <div class="text-sm font-semibold code-font text-indigo-700 bg-indigo-50/50 p-3 rounded-lg border border-indigo-100">
+                                    \text{Total Seek} = \sum_{i=1}^{N} | \text{Target}_i - \text{Head}_{i-1} |
+                                </div>
+                            </div>
+                            
+                            <!-- Detailed breakdown -->
+                            <div>
+                                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Iterative Step Formulations</div>
+                                <div id="math-steps-breakdown" class="text-xs sm:text-sm text-slate-600 space-y-1.5 max-h-[220px] overflow-y-auto pr-2 code-font leading-relaxed">
+                                    <!-- Populated dynamically -->
+                                </div>
+                            </div>
+
+                            <!-- Final Summary Calculation -->
+                            <div class="pt-4 border-t border-slate-100">
+                                <div class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5">Summation Result</div>
+                                <div id="math-summation-result" class="text-sm sm:text-base font-bold text-slate-800 code-font bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <!-- Dynamic total seek text math -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-slate-400 text-xs font-medium">
+            <p>Disk Arm Motion Visualizer — Academic Problem Solver.</p>
+            <p class="mt-1">Correctly matches 5000 cylinder bounds and direction changes with accurate step-by-step vector graphics representation.</p>
+        </div>
+    </footer>
+
+    <!-- Interactive Tooltip Box element for SVG Hovering -->
+    <div id="svg-tooltip" class="absolute hidden bg-slate-900 text-white text-xs rounded-xl p-3 shadow-xl border border-slate-800 pointer-events-none z-50 transition-opacity duration-150 flex flex-col gap-1">
+        <!-- Content will be inserted dynamically by SVG script -->
+    </div>
+
+    <script>
+        // --- DATA STATES ---
+        let state = {
+            totalCylinders: 5000,
+            currentHead: 300,
+            previousHead: 250,
+            queue: [2520, 1312, 2396, 2900, 453, 1719, 243, 1354, 4977, 3583],
+            scanMode: 'standard', // 'standard' = boundaries (0, 4999), 'look' = stop at extreme request
+            cscanWrap: true,      // true = count wrap-around as seek distance, false = wrap around is free
+            activeTab: 'fcfs',    // 'fcfs' | 'scan' | 'cscan' | 'sstf'
+            solutions: {}         // Stores results for each algorithm
+        };
+
+        // Static details for layout rendering
+        const algoDetails = {
+            fcfs: {
+                title: "FCFS (First-Come, First-Served)",
+                subtitle: "Simple Queue Order Policy",
+                desc: "Services requests strictly in the order they arrived in the queue. Minimal overhead, but doesn't optimize seek times."
+            },
+            scan: {
+                title: "SCAN (Elevator Algorithm)",
+                subtitle: "Directional Continuous Sweep",
+                desc: "The head sweeps continuously across the disk back and forth. Here, it moves towards 4999 first (since 250 → 300 is increasing), services all requests, reverses at the end, and then heads back towards 0."
+            },
+            cscan: {
+                title: "C-SCAN (Circular SCAN)",
+                subtitle: "One-Way Service Loop",
+                desc: "Provides more uniform waiting times. The disk arm sweeps in one direction (increasing). When it reaches the boundary, it jumps straight back to the opposite start (0) and begins scanning again."
+            },
+            sstf: {
+                title: "SSTF (Shortest Seek Time First)",
+                subtitle: "Greedy Shortest Path Policy",
+                desc: "Prioritizes requests with the shortest physical seek distance from the current position. Highly efficient, but can cause starvation for outer cylinders."
+            }
+        };
+
+        // Preset values from original assignment image to allow full resets
+        const ASSIGNMENT_PRESET = {
+            totalCylinders: 5000,
+            currentHead: 300,
+            previousHead: 250,
+            queue: [2520, 1312, 2396, 2900, 453, 1719, 243, 1354, 4977, 3583]
+        };
+
+        // --- SOLVER ALGORITHMS ---
+
+        function solveFCFS() {
+            let path = [state.currentHead];
+            state.queue.forEach(q => path.push(q));
+
+            let steps = [];
+            let totalDistance = 0;
+            for(let i = 1; i < path.length; i++) {
+                let diff = Math.abs(path[i] - path[i-1]);
+                totalDistance += diff;
+                steps.push({
+                    from: path[i-1],
+                    to: path[i],
+                    diff: diff,
+                    isJump: false,
+                    label: `Step ${i}`
+                });
+            }
+
+            return { path, totalDistance, steps };
+        }
+
+        function solveSSTF() {
+            let path = [state.currentHead];
+            let remaining = [...state.queue];
+            let current = state.currentHead;
+            let steps = [];
+            let totalDistance = 0;
+            let stepCounter = 1;
+
+            while(remaining.length > 0) {
+                // Find closest element
+                let minIdx = 0;
+                let minDist = Math.abs(remaining[0] - current);
+                
+                for(let i = 1; i < remaining.length; i++) {
+                    let dist = Math.abs(remaining[i] - current);
+                    if(dist < minDist) {
+                        minDist = dist;
+                        minIdx = i;
+                    }
+                }
+
+                let next = remaining[minIdx];
+                remaining.splice(minIdx, 1);
+                
+                path.push(next);
+                totalDistance += minDist;
+                steps.push({
+                    from: current,
+                    to: next,
+                    diff: minDist,
+                    isJump: false,
+                    label: `Step ${stepCounter++}`
+                });
+                current = next;
+            }
+
+            return { path, totalDistance, steps };
+        }
+
+        function solveSCAN() {
+            let path = [state.currentHead];
+            let steps = [];
+            let totalDistance = 0;
+
+            // Determine direction based on previous head
+            let direction = (state.currentHead >= state.previousHead) ? 'up' : 'down';
+            let left = state.queue.filter(q => q < state.currentHead).sort((a,b) => b-a); // sorted descending for down pass
+            let right = state.queue.filter(q => q >= state.currentHead).sort((a,b) => a-b); // sorted ascending for up pass
+
+            let current = state.currentHead;
+            let stepCounter = 1;
+
+            if (direction === 'up') {
+                // Serve rightwards (increasing)
+                right.forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+
+                // Reversing mechanism
+                if (state.scanMode === 'standard') {
+                    // Standard SCAN must touch the boundary (totalCylinders - 1)
+                    let boundary = state.totalCylinders - 1;
+                    if (current !== boundary) {
+                        let diff = Math.abs(boundary - current);
+                        totalDistance += diff;
+                        path.push(boundary);
+                        steps.push({ from: current, to: boundary, diff: diff, isJump: false, label: "Boundary Reach" });
+                        current = boundary;
+                    }
+                }
+
+                // Serve leftwards (decreasing)
+                // Left queue sorted descending (e.g., 243, etc.)
+                left.sort((a,b) => b-a).forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+            } else {
+                // Serve leftwards (decreasing) first
+                left.sort((a,b) => b-a).forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+
+                // Touch standard boundary 0 if selected
+                if (state.scanMode === 'standard') {
+                    let boundary = 0;
+                    if (current !== boundary) {
+                        let diff = Math.abs(boundary - current);
+                        totalDistance += diff;
+                        path.push(boundary);
+                        steps.push({ from: current, to: boundary, diff: diff, isJump: false, label: "Boundary Reach" });
+                        current = boundary;
+                    }
+                }
+
+                // Serve rightwards (increasing)
+                right.sort((a,b) => a-b).forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+            }
+
+            return { path, totalDistance, steps };
+        }
+
+        function solveCSCAN() {
+            let path = [state.currentHead];
+            let steps = [];
+            let totalDistance = 0;
+
+            let direction = (state.currentHead >= state.previousHead) ? 'up' : 'down';
+            let left = state.queue.filter(q => q < state.currentHead).sort((a,b) => a-b); // Sorted ascending
+            let right = state.queue.filter(q => q >= state.currentHead).sort((a,b) => a-b); // Sorted ascending
+
+            let current = state.currentHead;
+            let stepCounter = 1;
+
+            if (direction === 'up') {
+                // Serve rightwards
+                right.forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+
+                // Wrap-around Logic
+                if (state.scanMode === 'standard') {
+                    // Touch 4999 boundary first
+                    let boundaryMax = state.totalCylinders - 1;
+                    if (current !== boundaryMax) {
+                        let diff = Math.abs(boundaryMax - current);
+                        totalDistance += diff;
+                        path.push(boundaryMax);
+                        steps.push({ from: current, to: boundaryMax, diff: diff, isJump: false, label: "Boundary End" });
+                        current = boundaryMax;
+                    }
+                    
+                    // Jump to 0 boundary
+                    let jumpDiff = state.cscanWrap ? boundaryMax : 0;
+                    totalDistance += jumpDiff;
+                    path.push(0);
+                    steps.push({ from: current, to: 0, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
+                    current = 0;
+                } else {
+                    // C-LOOK Jump directly from largest request to smallest request
+                    if (left.length > 0) {
+                        let minLeft = left[0];
+                        let jumpDiff = state.cscanWrap ? Math.abs(minLeft - current) : 0;
+                        totalDistance += jumpDiff;
+                        path.push(minLeft);
+                        steps.push({ from: current, to: minLeft, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
+                        current = minLeft;
+                    }
+                }
+
+                // Serve remaining left requests (ascending order)
+                left.forEach(target => {
+                    // If we did C-LOOK, the smallest target might be served already
+                    if (target === current) return; 
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+
+            } else {
+                // Serve leftwards (downward direction)
+                // Left sorted descending for downward sweep
+                left.sort((a,b) => b-a).forEach(target => {
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+
+                // Wrap-around Logic (downward)
+                if (state.scanMode === 'standard') {
+                    // Reach 0 boundary
+                    let boundaryMin = 0;
+                    if (current !== boundaryMin) {
+                        let diff = Math.abs(boundaryMin - current);
+                        totalDistance += diff;
+                        path.push(boundaryMin);
+                        steps.push({ from: current, to: boundaryMin, diff: diff, isJump: false, label: "Boundary End" });
+                        current = boundaryMin;
+                    }
+
+                    // Jump back to 4999
+                    let boundaryMax = state.totalCylinders - 1;
+                    let jumpDiff = state.cscanWrap ? boundaryMax : 0;
+                    totalDistance += jumpDiff;
+                    path.push(boundaryMax);
+                    steps.push({ from: current, to: boundaryMax, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
+                    current = boundaryMax;
+                } else {
+                    // C-LOOK (downward sweep): Jump directly to largest request
+                    if (right.length > 0) {
+                        let maxRight = right[right.length - 1];
+                        let jumpDiff = state.cscanWrap ? Math.abs(maxRight - current) : 0;
+                        totalDistance += jumpDiff;
+                        path.push(maxRight);
+                        steps.push({ from: current, to: maxRight, diff: jumpDiff, isJump: true, label: "Wrap-Around Jump" });
+                        current = maxRight;
+                    }
+                }
+
+                // Serve right-hand requests descending order
+                right.sort((a,b) => b-a).forEach(target => {
+                    if (target === current) return;
+                    let diff = Math.abs(target - current);
+                    totalDistance += diff;
+                    path.push(target);
+                    steps.push({ from: current, to: target, diff: diff, isJump: false, label: `Step ${stepCounter++}` });
+                    current = target;
+                });
+            }
+
+            return { path, totalDistance, steps };
+        }
+
+
+        // --- UI DRAWING & DOM MANIPULATION ---
+
+        function triggerSolve() {
+            // Read UI states
+            const rawCylinders = parseInt(document.getElementById('input-cylinders').value);
+            const rawCurrent = parseInt(document.getElementById('input-current').value);
+            const rawPrevious = parseInt(document.getElementById('input-previous').value);
+            const rawQueueStr = document.getElementById('input-queue').value;
+
+            // Validate inputs
+            let errors = [];
+            if (isNaN(rawCylinders) || rawCylinders <= 0) {
+                errors.push("Total cylinders must be a positive integer greater than 0.");
+            }
+            if (isNaN(rawCurrent) || rawCurrent < 0 || rawCurrent >= rawCylinders) {
+                errors.push(`Current head must be inside disk cylinder bounds (0 to ${rawCylinders - 1}).`);
+            }
+            if (isNaN(rawPrevious) || rawPrevious < 0 || rawPrevious >= rawCylinders) {
+                errors.push(`Previous head must be inside disk cylinder bounds (0 to ${rawCylinders - 1}).`);
+            }
+
+            // Parse queue elements
+            let parsedQueue = rawQueueStr.split(',')
+                .map(item => item.trim())
+                .filter(item => item !== "")
+                .map(item => parseInt(item));
+
+            let outOfBoundsQueue = [];
+            let nanQueue = false;
+
+            parsedQueue.forEach(q => {
+                if (isNaN(q)) {
+                    nanQueue = true;
+                } else if (q < 0 || q >= rawCylinders) {
+                    outOfBoundsQueue.push(q);
+                }
+            });
+
+            if (nanQueue) {
+                errors.push("Queue contains non-numeric request values. Use only numbers separated by commas.");
+            }
+            if (outOfBoundsQueue.length > 0) {
+                errors.push(`Queue requests [${outOfBoundsQueue.join(', ')}] are out of cylinder boundaries (0 to ${rawCylinders - 1}).`);
+            }
+
+            const errorContainer = document.getElementById('error-container');
+            if (errors.length > 0) {
+                errorContainer.classList.remove('hidden');
+                document.getElementById('error-message').innerHTML = errors.map(err => `• ${err}`).join('<br>');
+                return; // halt calculations
+            } else {
+                errorContainer.classList.add('hidden');
+            }
+
+            // Commit to state
+            state.totalCylinders = rawCylinders;
+            state.currentHead = rawCurrent;
+            state.previousHead = rawPrevious;
+            state.queue = parsedQueue;
+
+            document.getElementById('queue-count').innerText = `${parsedQueue.length} requests`;
+
+            // Re-calculate algorithms
+            state.solutions.fcfs = solveFCFS();
+            state.solutions.sstf = solveSSTF();
+            state.solutions.scan = solveSCAN();
+            state.solutions.cscan = solveCSCAN();
+
+            // Refresh UI components
+            updateActiveTabUI();
+            updatePerformanceDashboard();
+        }
+
+        function switchTab(tabId) {
+            state.activeTab = tabId;
+            updateActiveTabUI();
+        }
+
+        function resetToPreset() {
+            document.getElementById('input-cylinders').value = ASSIGNMENT_PRESET.totalCylinders;
+            document.getElementById('input-current').value = ASSIGNMENT_PRESET.currentHead;
+            document.getElementById('input-previous').value = ASSIGNMENT_PRESET.previousHead;
+            document.getElementById('input-queue').value = ASSIGNMENT_PRESET.queue.join(', ');
+            
+            state.scanMode = 'standard';
+            state.cscanWrap = true;
+            triggerSolve();
+        }
+
+        function updatePerformanceDashboard() {
+            const container = document.getElementById('performance-bars');
+            container.innerHTML = '';
+
+            // Find min seek to highlight as best
+            let sortedAlgos = Object.keys(state.solutions).map(key => {
+                return { key: key, dist: state.solutions[key].totalDistance };
+            });
+            let minDistance = Math.min(...sortedAlgos.map(a => a.dist));
+            let maxDistance = Math.max(...sortedAlgos.map(a => a.dist));
+
+            sortedAlgos.forEach(item => {
+                const isBest = item.dist === minDistance;
+                const progressWidth = Math.max(10, (item.dist / maxDistance) * 100);
+                const colorClass = isBest ? 'bg-emerald-500' : 'bg-indigo-600';
+                const badgeHtml = isBest ? '<span class="text-[10px] bg-emerald-100 text-emerald-700 font-extrabold px-1.5 py-0.5 rounded uppercase">Best</span>' : '';
+
+                const barCard = `
+                    <div>
+                        <div class="flex justify-between items-center text-xs mb-1">
+                            <span class="font-bold text-slate-700 uppercase">${item.key.toUpperCase()}</span>
+                            <div class="flex items-center gap-1.5">
+                                ${badgeHtml}
+                                <span class="font-black text-slate-900 code-font">${item.dist} cyl</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-500 ${colorClass}" style="width: ${progressWidth}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += barCard;
+            });
+        }
+
+        function updateActiveTabUI() {
+            // Manage Active tabs classes
+            ['fcfs', 'scan', 'cscan', 'sstf'].forEach(tab => {
+                const tabEl = document.getElementById(`tab-${tab}`);
+                if (state.activeTab === tab) {
+                    tabEl.className = "flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-md shadow-indigo-100 border border-indigo-500";
+                } else {
+                    tabEl.className = "flex-1 min-w-[120px] py-3 px-4 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 bg-transparent hover:bg-slate-100 text-slate-600 border border-transparent";
+                }
+            });
+
+            const currentSol = state.solutions[state.activeTab];
+            const details = algoDetails[state.activeTab];
+
+            if (!currentSol) return;
+
+            // Update Descriptions headers
+            document.getElementById('algo-title').innerText = details.title;
+            document.getElementById('algo-subtitle').innerText = details.subtitle;
+            document.getElementById('algo-desc').innerText = details.desc;
+            document.getElementById('stat-total-distance').innerText = currentSol.totalDistance;
+
+            // Generate Service Sequence Badges
+            const badgeContainer = document.getElementById('sequence-badges-container');
+            badgeContainer.innerHTML = '';
+            
+            currentSol.path.forEach((val, idx) => {
+                const isStart = idx === 0;
+                const isJump = currentSol.steps[idx - 1]?.isJump === true;
+
+                if (idx > 0) {
+                    // Draw separator indicator arrow
+                    badgeContainer.innerHTML += `
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-300 mx-0.5 shrink-0 ${isJump ? 'text-red-300 stroke-[3px]' : ''}"></i>
+                    `;
+                }
+
+                let badgeClass = "bg-white text-slate-700 border-slate-200";
+                if (isStart) {
+                    badgeClass = "bg-indigo-600 text-white border-indigo-600 font-bold shadow-sm ring-4 ring-indigo-50";
+                } else if (isJump) {
+                    badgeClass = "bg-red-50 text-red-700 border-red-200 font-semibold";
+                } else if (state.queue.includes(val)) {
+                    badgeClass = "bg-slate-100 text-slate-800 border-slate-200 font-semibold";
+                } else {
+                    // Boundary values added by algorithm sweeps
+                    badgeClass = "bg-amber-50 text-amber-800 border-amber-200 font-semibold";
+                }
+
+                badgeContainer.innerHTML += `
+                    <span class="px-2.5 py-1 text-xs code-font rounded-lg border shadow-xs select-all transition-transform hover:scale-105 ${badgeClass}">
+                        ${val}
+                    </span>
+                `;
+            });
+
+            // Trigger visual graph re-drawing
+            renderSVGGraph(currentSol);
+
+            // Re-render mathematics step explanations
+            renderMathSteps(currentSol);
+
+            // Initialize freshly appended Lucide Icons
+            lucide.createIcons();
+        }
+
+        // --- HIGH FIDELITY INTERACTIVE SVG GENERATOR ---
+
+        function renderSVGGraph(solution) {
+            const svg = document.getElementById('visual-graph-svg');
+            svg.innerHTML = ''; // clear all child nodes
+
+            // Define responsive coordinate scaling variables
+            const width = 1000;
+            const paddingLeft = 65;
+            const paddingRight = 65;
+            
+            // Collect all key landmark coordinates that need vertical gridlines (Mockup replica)
+            // Starts with boundaries, starting position, and queued tasks
+            let landmarkValues = [0, ...state.queue, state.currentHead, state.totalCylinders - 1];
+            // Include algorithm's complete path in case it features LOOK/SCAN extremes
+            solution.path.forEach(p => landmarkValues.push(p));
+            // De-duplicate & Sort ascending
+            let uniqueLandmarks = [...new Set(landmarkValues)].sort((a,b) => a-b);
+
+            // X scale mapping function
+            function getX(val) {
+                return paddingLeft + (val / (state.totalCylinders - 1)) * (width - paddingLeft - paddingRight);
+            }
+
+            // Generate Y dimensions dynamically based on step size so it mimics linear time going down
+            const totalSteps = solution.path.length;
+            const stepHeight = Math.min(45, 450 / (totalSteps || 1));
+            const paddingTop = 95;
+            const plotHeight = paddingTop + (totalSteps - 1) * stepHeight;
+            const totalSvgHeight = plotHeight + 40;
+            
+            // Resize SVG Box container viewport size smoothly
+            svg.setAttribute('viewBox', `0 0 ${width} ${totalSvgHeight}`);
+
+            // 1. Add Arrow Marker Definitions
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            defs.innerHTML = `
+                <marker id="arrow-segment" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#4f46e5"/>
+                </marker>
+                <marker id="arrow-jump" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#ef4444"/>
+                </marker>
+            `;
+            svg.appendChild(defs);
+
+            // 2. Draw Vertical grid lines + Cylinder text markers (with stagger layout to avoid overlaps)
+            uniqueLandmarks.forEach((landmark, index) => {
+                const xPos = getX(landmark);
+                const isCurrentHead = landmark === state.currentHead;
+                const isBoundary = (landmark === 0 || landmark === state.totalCylinders - 1);
+
+                // Create the vertical lane line
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute('x1', xPos);
+                line.setAttribute('y1', paddingTop - 15);
+                line.setAttribute('x2', xPos);
+                line.setAttribute('y2', plotHeight + 15);
+
+                // Style based on role (mirroring drawing blueprint)
+                if (isCurrentHead) {
+                    line.setAttribute('stroke', '#818cf8'); // highlighted indigo
+                    line.setAttribute('stroke-width', '2.5');
+                    line.setAttribute('stroke-dasharray', 'none');
+                } else if (isBoundary) {
+                    line.setAttribute('stroke', '#cbd5e1'); // solid slate boundary border
+                    line.setAttribute('stroke-width', '2');
+                } else {
+                    line.setAttribute('stroke', '#e2e8f0'); // dashed thin separator lines
+                    line.setAttribute('stroke-width', '1.2');
+                    line.setAttribute('stroke-dasharray', '4,4');
+                }
+                svg.appendChild(line);
+
+                // Staggered top labels placement algorithm
+                const staggerLevels = 4;
+                const level = index % staggerLevels;
+                const textY = 20 + level * 16;
+
+                // Create connector tick line from cylinder text to lane top
+                const tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                tick.setAttribute('x1', xPos);
+                tick.setAttribute('y1', textY + 3);
+                tick.setAttribute('x2', xPos);
+                tick.setAttribute('y2', paddingTop - 15);
+                tick.setAttribute('stroke', isCurrentHead ? '#6366f1' : '#cbd5e1');
+                tick.setAttribute('stroke-width', '1');
+                svg.appendChild(tick);
+
+                // Cylinder label text element
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute('x', xPos);
+                text.setAttribute('y', textY);
+                text.setAttribute('text-anchor', 'middle');
+                text.textContent = landmark;
+                
+                // Style labels
+                text.setAttribute('class', 'code-font font-bold select-none');
+                text.setAttribute('font-size', '11px');
+                
+                if (isCurrentHead) {
+                    text.setAttribute('fill', '#4f46e5');
+                    text.setAttribute('font-weight', '800');
+                } else if (isBoundary) {
+                    text.setAttribute('fill', '#475569');
+                } else {
+                    text.setAttribute('fill', '#64748b');
+                }
+                svg.appendChild(text);
+            });
+
+            // 3. Draw Path segments (the timeline motions going downwards)
+            for (let i = 1; i < solution.path.length; i++) {
+                const x1 = getX(solution.path[i-1]);
+                const y1 = paddingTop + (i-1) * stepHeight;
+                const x2 = getX(solution.path[i]);
+                const y2 = paddingTop + i * stepHeight;
+
+                const stepInfo = solution.steps[i-1];
+                const isJump = stepInfo?.isJump === true;
+
+                // Segment line element
+                const segment = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                segment.setAttribute('x1', x1);
+                segment.setAttribute('y1', y1);
+                segment.setAttribute('x2', x2);
+                segment.setAttribute('y2', y2);
+
+                if (isJump) {
+                    // Highlight circular C-SCAN wrapping Jump with red dash line
+                    segment.setAttribute('stroke', '#f87171');
+                    segment.setAttribute('stroke-width', '2');
+                    segment.setAttribute('stroke-dasharray', '5,5');
+                    segment.setAttribute('marker-end', 'url(#arrow-jump)');
+                } else {
+                    segment.setAttribute('stroke', '#4f46e5');
+                    segment.setAttribute('stroke-width', '3');
+                    segment.setAttribute('marker-end', 'url(#arrow-segment)');
+                }
+
+                // Add mouse event listners for rich interactivity!
+                segment.addEventListener('mouseenter', (e) => {
+                    showTooltip(e, `
+                        <div class="font-bold text-slate-200 uppercase tracking-widest text-[9px]">Motion Step ${i}</div>
+                        <div class="text-xs font-semibold mt-1">From: <span class="text-indigo-400 code-font">${solution.path[i-1]}</span> → To: <span class="text-indigo-400 code-font">${solution.path[i]}</span></div>
+                        <div class="text-xs mt-0.5 border-t border-slate-700 pt-1">Seek Distance: <strong class="text-emerald-400 code-font">${stepInfo?.diff}</strong> cylinders</div>
+                    `);
+                    segment.setAttribute('stroke-width', isJump ? '3.5' : '5');
+                });
+                segment.addEventListener('mouseleave', () => {
+                    hideTooltip();
+                    segment.setAttribute('stroke-width', isJump ? '2' : '3');
+                });
+
+                svg.appendChild(segment);
+            }
+
+            // 4. Draw node circles over intersection points
+            solution.path.forEach((val, i) => {
+                const x = getX(val);
+                const y = paddingTop + i * stepHeight;
+                const isStart = i === 0;
+                
+                // Check if this step is part of a wrap jump
+                const incomingStep = solution.steps[i-1];
+                const outgoingStep = solution.steps[i];
+                const isJumpPoint = (incomingStep?.isJump || outgoingStep?.isJump);
+
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute('cx', x);
+                circle.setAttribute('cy', y);
+
+                // Scale sizes
+                circle.setAttribute('r', isStart ? '7.5' : '5.5');
+                
+                // Color nodes
+                if (isStart) {
+                    circle.setAttribute('fill', '#4f46e5');
+                    circle.setAttribute('stroke', '#ffffff');
+                    circle.setAttribute('stroke-width', '2.5');
+                } else if (isJumpPoint) {
+                    circle.setAttribute('fill', '#ef4444');
+                    circle.setAttribute('stroke', '#ffffff');
+                    circle.setAttribute('stroke-width', '2');
+                } else {
+                    circle.setAttribute('fill', '#1e293b');
+                    circle.setAttribute('stroke', '#ffffff');
+                    circle.setAttribute('stroke-width', '1.5');
+                }
+
+                // Node interactive hovering actions
+                circle.addEventListener('mouseenter', (e) => {
+                    circle.setAttribute('r', isStart ? '9.5' : '8');
+                    let name = (i === 0) ? "Start Head Location" : `Service Step ${i}`;
+                    if (incomingStep?.isJump) name = "Jump Arrival Coordinate";
+                    
+                    showTooltip(e, `
+                        <div class="font-bold text-slate-300 uppercase tracking-wider text-[9px]">${name}</div>
+                        <div class="text-sm font-black mt-0.5 text-white">Cylinder <span class="code-font text-indigo-300">${val}</span></div>
+                    `);
+                });
+                circle.addEventListener('mouseleave', () => {
+                    circle.setAttribute('r', isStart ? '7.5' : '5.5');
+                    hideTooltip();
+                });
+
+                svg.appendChild(circle);
+
+                // Small index text label beside each node circle
+                const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute('x', x + 10);
+                label.setAttribute('y', y + 4);
+                label.setAttribute('fill', isStart ? '#4f46e5' : '#64748b');
+                label.setAttribute('font-size', '10px');
+                label.setAttribute('class', 'font-semibold select-none');
+                label.textContent = isStart ? "Start (300)" : `(${i})`;
+                svg.appendChild(label);
+            });
+        }
+
+        // Tooltip action methods
+        function showTooltip(event, content) {
+            const tooltip = document.getElementById('svg-tooltip');
+            tooltip.innerHTML = content;
+            tooltip.classList.remove('hidden');
+            tooltip.style.opacity = '1';
+            
+            // Positions tooltip dynamically near cursor
+            const x = event.pageX;
+            const y = event.pageY;
+            tooltip.style.left = `${x + 15}px`;
+            tooltip.style.top = `${y + 15}px`;
+        }
+
+        function hideTooltip() {
+            const tooltip = document.getElementById('svg-tooltip');
+            tooltip.classList.add('hidden');
+            tooltip.style.opacity = '0';
+        }
+
+        // --- MATH EXPLANATIONS GENERATOR ---
+
+        function renderMathSteps(solution) {
+            const stepsContainer = document.getElementById('math-steps-breakdown');
+            const resultContainer = document.getElementById('math-summation-result');
+
+            stepsContainer.innerHTML = '';
+
+            let equationTerms = [];
+            let numberTerms = [];
+
+            solution.steps.forEach((step, idx) => {
+                const line = document.createElement('div');
+                line.className = "flex justify-between items-center py-1 border-b border-slate-100 last:border-0 hover:bg-slate-100/50 px-2 rounded transition-all";
+
+                const isJump = step.isJump;
+                const valueLabel = isJump ? `<span class="text-red-600 font-bold">(Wrap-Around Jump: +${step.diff})</span>` : `Seek: ${step.diff}`;
+
+                line.innerHTML = `
+                    <span class="text-slate-500 font-medium">Step ${idx + 1}: <span class="text-slate-700 font-bold">${step.from}</span> → <span class="text-slate-700 font-bold">${step.to}</span></span>
+                    <span class="font-semibold text-slate-800">|${step.to} - ${step.from}| = ${valueLabel}</span>
+                `;
+                stepsContainer.appendChild(line);
+
+                equationTerms.push(`|${step.to} - ${step.from}|`);
+                numberTerms.push(step.diff);
+            });
+
+            // Update bottom math sum result block
+            const eqString = equationTerms.join(' + ');
+            const valString = numberTerms.join(' + ');
+
+            resultContainer.innerHTML = `
+                <div class="text-xs text-slate-500 font-semibold mb-1">Expanded Calculation:</div>
+                <div class="overflow-x-auto whitespace-nowrap scrollbar-thin pb-2 text-slate-600 text-xs leading-relaxed">
+                    Total = ${eqString}
+                </div>
+                <div class="overflow-x-auto whitespace-nowrap scrollbar-thin pb-2 text-slate-800 text-xs sm:text-sm font-semibold mt-2 border-t border-slate-200/50 pt-2">
+                    Total = ${valString}
+                </div>
+                <div class="text-lg font-black text-indigo-600 mt-2 flex items-center gap-1">
+                    = ${solution.totalDistance} <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Cylinders traveled</span>
+                </div>
+            `;
+        }
+
+        // --- ONLOAD INITIALIZATION ---
+        window.onload = function() {
+            // Initiate full solving engine
+            triggerSolve();
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

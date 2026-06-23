@@ -34,6 +34,20 @@ document.addEventListener('DOMContentLoaded', () => {
    *  1.  READ FILE MANIFEST & RENDER CARDS
    * ------------------------------------------------------ */
   const filesData = window.STUDYVAULT_FILES || [];
+
+  // --- Dynamic "New File" Tracking System ---
+  let knownFiles = [];
+  try {
+    const stored = localStorage.getItem('studyvault_known_files');
+    if (stored) knownFiles = JSON.parse(stored);
+  } catch(e) {}
+
+  // If this is the very first time we run this feature, initialize the known files list.
+  // We exclude "OS_Diagrams" from initialization so it appears as "New" for the user right now.
+  if (!localStorage.getItem('studyvault_known_files')) {
+    knownFiles = filesData.map(f => f.fileName).filter(name => !name.includes("OS_Diagrams"));
+    localStorage.setItem('studyvault_known_files', JSON.stringify(knownFiles));
+  }
   const grid = document.getElementById('files-grid');
   const searchInput = document.getElementById('search-input');
   const emptyState = document.getElementById('empty-state');
@@ -96,12 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const escapedTitle = (file.title || file.fileName).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const escapedDesc = (file.description || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Show "New" ribbon if it's the OS_Diagrams file and hasn't been seen yet
-    const isNew = file.fileName.includes("OS_Diagrams") && !localStorage.getItem('seen_' + safeId);
+    // Show "New" ribbon if the file is NOT in the knownFiles array
+    const isNew = !knownFiles.includes(file.fileName);
     const newBadgeHtml = isNew ? `<div class="ribbon-new" id="new-badge-${safeId}">New</div>` : '';
 
     return `
-      <article class="file-card" data-category="${file.category || ''}" data-name="${escapedTitle}" data-filepath="${file.filePath}" data-safeid="${safeId}" id="file-card-${index + 1}">
+      <article class="file-card" data-category="${file.category || ''}" data-name="${escapedTitle}" data-filename="${file.fileName}" data-filepath="${file.filePath}" data-safeid="${safeId}" id="file-card-${index + 1}">
         ${newBadgeHtml}
         <div class="file-card__glow" aria-hidden="true"></div>
         <div class="file-card__checkbox">
@@ -491,12 +505,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (grid) {
     grid.addEventListener('click', async (e) => {
-      // Dismiss new badge and mark as seen
+      // Dismiss new badge and mark as seen (add to known files)
       const cardClicked = e.target.closest('.file-card');
-      if (cardClicked && cardClicked.dataset.safeid) {
-        const safeId = cardClicked.dataset.safeid;
-        if (!localStorage.getItem('seen_' + safeId)) {
-          localStorage.setItem('seen_' + safeId, 'true');
+      if (cardClicked && cardClicked.dataset.filename && cardClicked.dataset.safeid) {
+        const fileName = cardClicked.dataset.filename;
+        let kFiles = JSON.parse(localStorage.getItem('studyvault_known_files') || '[]');
+        if (!kFiles.includes(fileName)) {
+          kFiles.push(fileName);
+          localStorage.setItem('studyvault_known_files', JSON.stringify(kFiles));
+          
+          const safeId = cardClicked.dataset.safeid;
           const badge = document.getElementById('new-badge-' + safeId);
           if (badge) badge.style.display = 'none';
         }
